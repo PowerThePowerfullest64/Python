@@ -1,49 +1,29 @@
-import periodictable as pt
-import chempy as cp
+import time
+import random
+import math
 
-names = {
-    0: "nothing",
-    1: "hydrogen",
-    2: "helium",
-    3: "lithium"
-}
+def sort(l: list[int]):
+    for i in range(len(l)):
+        swapped = False
+        for j in range(len(l)-1):
+            if l[j] > l[j+1]:
+                swapped = True
+                l[j], l[j+1] = l[j+1], l[j]
+        if not swapped:
+            break
 
-short_names = {
-    0: "nothing",
-    1: "H",
-    2: "He",
-    3: "Li"
-}
 
-class Atom:
-    def __init__(self, protons, neutrons, electrons):
-        self.protons = protons
-        self.neutrons = neutrons
-        self.electrons = electrons
+my_list = []
+for i in range(1000):
+    my_list.append(random.randint(1, 1000))
 
-    def charge(self) -> int:
-        return self.protons - self.electrons
+start = time.perf_counter()
 
-    def name(self) -> str:
-        if self.protons == 1 and self.neutrons == 0 and self.electrons == 0:
-            return "proton"
+sort(my_list)
 
-        end: str = ""
-        charge = self.charge()
-        if charge > 0:
-            end = "ion"
-        elif charge < 0:
-            end = "id"
+end = time.perf_counter()
+duration = (end - start) * 1000
 
-        return names[self.protons] + end
+print(my_list)
 
-    def short_name(self) -> str:
-        return short_names[self.protons]
-
-class Bond:
-    def __init__(self):
-        self.atoms: list[Atom]
-
-hydrogen: Atom = Atom(3, 0, 3)
-print(hydrogen.short_name())
-print(cp.atomic_number("lithium"))
+print(f"Program execution took {duration} ms!")
