@@ -4,24 +4,6 @@ from numba import njit
 import pygame as pg
 import random
 
-square_size = 32
-
-texture_path = "textures/minesweeper/"
-revealed_textures = [
-    pg.transform.scale(pg.image.load(texture_path + "0.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "1.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "2.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "3.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "4.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "5.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "6.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "7.png"), (square_size, square_size)),
-    pg.transform.scale(pg.image.load(texture_path + "8.png"), (square_size, square_size)),
-]
-print("Loaded Textures Successfully!")
-
-
-
 class Plane:
     def __init__(self):
         self.width, self.height = 32, 32
@@ -29,20 +11,18 @@ class Plane:
         self.revealed: list[bool] = [False] * (self.width * self.height)
         self.marked: list[int] = []
         self.hidden_color = (150, 150, 150)
-        self.marked_color = (255, 255, 100)
-        self.grid_color = "white"
+        self.grid_color = (100, 100, 100)
         self.lost = False
         self.first_place = True
         self.find_empty_tries = 0
-        self.max_empty_tries = 1000
+        self.max_empty_tries = 500
 
-        self.bomb_count = 512
+        self.bomb_count = 192
 
         self.init_bombs(self.bomb_count)
         self.set_states()
 
     def restart(self, soft=True):
-        self.marked.clear()
         self.lost = False
         self.first_place = True
         self.revealed = [False] * (self.width * self.height)
@@ -51,6 +31,8 @@ class Plane:
         self.set_states()
 
         if soft:
+            self.find_empty_tries = 0
+            self.marked.clear()
             print("Restarted game!")
 
     def init_bombs(self, count: int):
@@ -89,14 +71,14 @@ class Plane:
 
                 if not self.revealed[index]:
                     color = self.hidden_color
-                    if index in self.marked:
-                        color = self.marked_color
                     pg.draw.rect(window, color, rect)
+                    if index in self.marked:
+                        window.blit(flag_texture, rect)
                 else:
                     state: int = self.state[index]
 
                     if state < 0: # bomb!
-                        pg.draw.rect(window, "red", rect)
+                        window.blit(bomb_texture, rect)
                         continue
 
                     try:
@@ -127,7 +109,8 @@ class Plane:
         if self.first_place:
             if self.state[index] != 0:
                 if self.find_empty_tries >= self.max_empty_tries:
-                    print("Couldn't find a valid starter position :(")
+                    print("Couldn't find a valid starter position. Closing game :(")
+                    self.lost = True
                     return
 
                 self.find_empty_tries += 1
@@ -218,6 +201,23 @@ pg.display.set_caption("Minesweeper")
 clock = pg.time.Clock()
 running = True
 plane: Plane = Plane()
+
+square_size = min(width, height) // max(plane.width, plane.height)
+texture_path = "textures/minesweeper/"
+revealed_textures = [
+    pg.transform.scale(pg.image.load(texture_path + "0.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "1.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "2.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "3.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "4.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "5.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "6.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "7.png"), (square_size, square_size)),
+    pg.transform.scale(pg.image.load(texture_path + "8.png"), (square_size, square_size)),
+]
+flag_texture = pg.transform.scale(pg.image.load(texture_path + "flag.png"), (square_size, square_size)).convert_alpha()
+bomb_texture = pg.transform.scale(pg.image.load(texture_path + "bomb.png"), (square_size, square_size))
+print("Loaded Textures Successfully!")
 
 play_button: Button = Button(width/2 - 250/2, height/2 - 100/2, 250, 100, "red")
 retry_button: Button = Button(width/2 - 250/2, height/2 - 100/2, 250, 100, "green")
