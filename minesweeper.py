@@ -32,19 +32,26 @@ class Plane:
         self.marked_color = (255, 255, 100)
         self.grid_color = "white"
         self.lost = False
+        self.first_place = True
+        self.find_empty_tries = 0
+        self.max_empty_tries = 1000
 
-        self.bomb_count = 256
+        self.bomb_count = 512
 
         self.init_bombs(self.bomb_count)
         self.set_states()
 
-    def restart(self):
+    def restart(self, soft=True):
         self.marked.clear()
         self.lost = False
+        self.first_place = True
         self.revealed = [False] * (self.width * self.height)
         self.state = [0] * (self.width * self.height)
         self.init_bombs(self.bomb_count)
         self.set_states()
+
+        if soft:
+            print("Restarted game!")
 
     def init_bombs(self, count: int):
         if count >= self.width * self.height:
@@ -66,14 +73,10 @@ class Plane:
 
         if count > 0:
             print("Partially placed bombs because not all bombs could find a valid square.")
-        else:
-            print("All bombs were placed successfully.")
 
     def set_states(self):
         for i in range(self.width * self.height):
             self.state[i] = self.count(i)
-
-        print("All states were set successfully.")
 
     def inside(self, x: int, y: int):
         return x >= 0 and x < self.width and y >= 0 and y < self.height
@@ -121,11 +124,21 @@ class Plane:
         if index in self.marked:
             return # cannot reveal marked cell!
 
-        self.revealed[index] = True
+        if self.first_place:
+            if self.state[index] != 0:
+                if self.find_empty_tries >= self.max_empty_tries:
+                    print("Couldn't find a valid starter position :(")
+                    return
 
-        if self.state[index] < 0:
+                self.find_empty_tries += 1
+                self.restart(soft=False)
+                self.reveal(x, y)
+        elif self.state[index] < 0:
             self.reveal_all() # reveal all squares when mine is pressed.
             self.lost = True
+
+        self.first_place = False
+        self.revealed[index] = True
 
         # flood fill.
         if self.state[index] == 0:
