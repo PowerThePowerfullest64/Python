@@ -1,6 +1,7 @@
 import random
 import numpy as np
 from copy import deepcopy
+from termcolor import colored
 
 from piece_loader import load_pieces
 colors = ['red', 'magenta', 'green', 'yellow', 'blue']
@@ -90,10 +91,40 @@ class Surface:
                     return
 
     def game_over(self):
-        if self.score < 1:
+        if self.score == 0:
             print("\n\033[1m" + "\033[4m" + f"You suck\nScore: \033[32m{self.score}")
         else:    
             print("\n\033[1m" + "\033[4m" + f"!!!Game over!!! \nScore: \033[32m{self.score}")
+
+        print(colored("", "white"), end="")
+
+        try:
+            read_file = open("highscore.bin", "rb")
+            data = np.fromfile(read_file, dtype=np.uint32)
+            read_file.close()
+            file_highscore = data[0] if data.size > 0 else 0
+
+            if file_highscore < self.score:
+                write_file = open("highscore.bin", "wb")
+                write_file.write(self.score.to_bytes(4, byteorder="little"))
+                write_file.close()
+                print(f"You beat the previous highscore of ", end="")
+                print(colored(str(file_highscore), "cyan", attrs=["bold", "underline"]), end="")
+                print(colored("!", "white"))
+            elif file_highscore == self.score:
+                print("You got the same score as the highscore. Tuff lock.")
+            else:
+                print(f"You didn't beat the highscore of ", end="")
+                print(colored(str(file_highscore), "cyan", attrs=["bold", "underline"]), end="")
+                print(colored("!", "white"))
+            
+        except FileNotFoundError:
+            if self.score > 0:
+                write_file = open("highscore.bin", "wb")
+                write_file.write(self.score.to_bytes(4, byteorder="little"))
+                write_file.close()
+                print("You set the first highscore!")
+        
         input("\033[0m\nPress enter to exit")
         exit()
 
