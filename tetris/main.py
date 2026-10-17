@@ -1,12 +1,13 @@
 import time
 import msvcrt
-import math
 
 import surface
 from render import render
 from rotate import rotate
 
+import os
 
+os.system("")
 
 def set_tps(target):
     global tps, tick_dur

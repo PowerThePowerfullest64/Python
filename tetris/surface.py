@@ -2,6 +2,7 @@ import random
 import numpy as np
 from copy import deepcopy
 from termcolor import colored
+from highscore import save_score, load_score
 
 from piece_loader import load_pieces
 colors = ['red', 'magenta', 'green', 'yellow', 'blue']
@@ -98,31 +99,24 @@ class Surface:
 
         print(colored("", "white"), end="")
 
-        try:
-            read_file = open("highscore.bin", "rb")
-            data = np.fromfile(read_file, dtype=np.uint32)
-            read_file.close()
-            file_highscore = data[0] if data.size > 0 else 0
+        highscore = load_score()
 
-            if file_highscore < self.score:
-                write_file = open("highscore.bin", "wb")
-                write_file.write(self.score.to_bytes(4, byteorder="little"))
-                write_file.close()
+        if highscore >= 0:
+            if self.score > highscore:
+                save_score(self.score)
                 print(f"You beat the previous highscore of ", end="")
-                print(colored(str(file_highscore), "cyan", attrs=["bold", "underline"]), end="")
+                print(colored(str(highscore), "cyan", attrs=["bold", "underline"]), end="")
                 print(colored("!", "white"))
-            elif file_highscore == self.score:
-                print("You got the same score as the highscore. Tuff lock.")
+            elif highscore == self.score:
+                print("You got the same score as the highscore. Tuff luck.")
             else:
                 print(f"You didn't beat the highscore of ", end="")
-                print(colored(str(file_highscore), "cyan", attrs=["bold", "underline"]), end="")
+                print(colored(str(highscore), "cyan", attrs=["bold", "underline"]), end="")
                 print(colored("!", "white"))
             
-        except FileNotFoundError:
+        else:
             if self.score > 0:
-                write_file = open("highscore.bin", "wb")
-                write_file.write(self.score.to_bytes(4, byteorder="little"))
-                write_file.close()
+                save_score(self.score)
                 print("You set the first highscore!")
         
         input("\033[0m\nPress enter to exit")
