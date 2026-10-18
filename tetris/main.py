@@ -1,4 +1,4 @@
-import time
+from time import time, perf_counter, sleep
 import msvcrt
 
 import surface
@@ -19,11 +19,11 @@ def easeOutQuad(x) -> float:
 
 def calc_tps():
     global start_time
-    elapsed = time.time() - start_time
+    elapsed = time() - start_time
     
     return max(easeOutQuad(elapsed/3000)*20, 1.0)
 
-previous_time = time.perf_counter()
+previous_time = perf_counter()
 
 key_mapping = {
     'H': "Up",
@@ -77,16 +77,16 @@ def update_input() -> bool:
 
 if __name__ == "__main__":
     sf = surface.Surface((10, 20))
-    print("\n" * (sf.height + 10), end="")  # move down so we don't delete old terminal
+    print("\n" * (sf.height + 10), end="") # move down so we don't delete old terminal
 
     acc = 0.0
     tps = 1.0
     tick_dur = 1.0 / tps
 
-    start_time = time.time()
+    start_time = time()
 
     while True:
-        now = time.perf_counter()
+        now = perf_counter()
         dt = now - previous_time
         previous_time = now
         acc += dt
@@ -106,4 +106,4 @@ if __name__ == "__main__":
 
         set_tps(min(20, calc_tps())) #calc is short for calculator
 
-        time.sleep(1/60)
+        sleep(1/60)
