@@ -30,7 +30,7 @@ def my_on_click(x, y, button, pressed):
 # 2. This function matches the Windows API signature (msg, data)
 def win32_blocker(msg, data):
     # Returning False here tells Windows to completely ignore the click
-    return False 
+    return False
 
 # 3. Initialize the listener manually
 listener = mouse.Listener(
