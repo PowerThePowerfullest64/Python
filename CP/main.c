@@ -113,6 +113,8 @@ int main() {
 
     struct vector v;
     v_init(&v, sizeof(int));
+
+    v_reserve(&v, 1000);
     
     for (int i = 0; i < 1000; ++i) {
         v_push(&v, &i);

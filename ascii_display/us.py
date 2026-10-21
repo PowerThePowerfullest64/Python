@@ -1,0 +1,2 @@
+def tuffness():
+    pass
