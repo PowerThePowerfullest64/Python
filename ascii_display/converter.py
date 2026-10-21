@@ -3,82 +3,96 @@ from us import tuffness
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+import time, os
+from moviepy import VideoFileClip#, AudioFileClip
 
-ASCII_CHARS = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"]
+ASCII_CHARS = np.array(list(" .'`^,:;Il!i><~+_-?[}{)(|/tfjrxnvczXYUJCLQOZmwqpdbkhao*#MW&8%B@$"))
 
-def pixel_to_ascii(brightness):
-    return ASCII_CHARS[brightness // 26]
+def load_monospace_font(size=12):
+    for name in ["consola.ttf", "cour.ttf", "DejaVuSansMono.ttf", "Menlo.ttc"]:
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            pass
+    raise RuntimeError("No monospace font found.")
 
-def convert(input_file_path: str, output_path="output.mp4", cols=100):
+def build_atlas(font):
+    ascent, descent = font.getmetrics()
+    cw = int(np.ceil(font.getlength("@")))
+    ch = ascent + descent
+    atlas = np.zeros((len(ASCII_CHARS), ch, cw), np.float32)
+    for i, c in enumerate(ASCII_CHARS):
+        img = Image.new("L", (cw, ch), 0)
+        ImageDraw.Draw(img).text((0, 0), c, font=font, fill=255)
+        atlas[i] = np.asarray(img, np.float32) / 255.0
+    return atlas, cw, ch
+    
+
+def add_audio(ascii_vid_path, src_path, output_path):
+    src = VideoFileClip(src_path)
+    vid = VideoFileClip(ascii_vid_path)
+    if src.audio is not None:
+        vid = vid.with_audio(src.audio)
+    vid.write_videofile(output_path, codec="libx264", audio_codec="aac")
+    src.close(); vid.close()
+
+def convert(input_file_path: str, output_path="", cols=100):
+    """mp4 -> mp4 but ascii"""
+    if output_path == "":
+        output_path = input_file_path + str(cols)
+    output_path += ".mp4"
+    input_file_path = "input_" + input_file_path + ".mp4"
+    print(output_path)
+
     cap = cv2.VideoCapture(input_file_path)
     if not cap.isOpened():
-        raise FileNotFoundError(f"Error: Could not find or open {input_file_path}")
+        raise FileNotFoundError(input_file_path)
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     orig_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     orig_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    
-    char_width = 10
-    char_height = 18
+    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    # rows and cols of characters
-    rows = int((orig_h / orig_w) * cols * (char_width / char_height))
+    atlas, cw, ch = build_atlas(load_monospace_font(12))
+    rows = max(1, int((orig_h / orig_w) * cols * (cw / ch)))
 
-    #pixels
-    out_width = cols * char_width
-    out_height = rows * char_height
-    
-    # Set up the MP4 video writer type shift
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (out_width, out_height))
+    out_w, out_h = cols * cw, rows * ch
+    out_w -= out_w % 2
+    out_h -= out_h % 2
 
-    font = ImageFont.load_default()
-    frame_count = 0
+    os.makedirs("temps", exist_ok=True)
+    ascii_path = os.path.join("temps", "TEMP_" + output_path)
+    out = cv2.VideoWriter(ascii_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (out_w, out_h))
+    if not out.isOpened():
+        raise RuntimeError("VideoWriter failed to open")
 
-    print(f"Beginning to render {total_frames} frames.\n")
-
-    while cap.isOpened():
+    n, start = 0, time.time()
+    while True:
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Shrink the frame down to our ASCII grid size (aura/nigger)
-        small_frame = cv2.resize(frame, (cols, rows))
-        gray_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2GRAY)
+        small = cv2.resize(frame, (cols, rows), interpolation=cv2.INTER_NEAREST)
+        gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+        idx = gray // 4
 
-        #create BLACK canvas
-        pil_img = Image.new('RGB', (out_width, out_height), color=(0, 0, 0))
-        draw = ImageDraw.Draw(pil_img)
+        mask = atlas[idx].transpose(0, 2, 1, 3).reshape(rows * ch, cols * cw)
+        color = cv2.resize(small, (cols * cw, rows * ch), interpolation=cv2.INTER_NEAREST)
 
-        for y in range(rows):
-            for x in range(cols):
-                b, g, r = small_frame[y, x] #bgr :sob:
-                brightness = gray_frame[y, x]
-                char = ASCII_CHARS[brightness // 26]
+        img = (color * mask[:, :, None]).astype(np.uint8)[:out_h, :out_w]
+        out.write(img)
 
-                if char != " ":
-                    draw.text(
-                        (x * char_width, y * char_height),
-                        char,
-                        font=font,
-                        fill=(int(r), int(g), int(b))
-                    )
-                    
-        out_frame = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-        out.write(out_frame)
-
-        frame_count += 1
-        if (frame_count % 30 == 0):
-            print(f"Processed {frame_count} / {total_frames} frames!")
-
-
+        n += 1
+        if n % 10 == 0:
+            avg = (time.time() - start) / n
+            print(f"{n}/{total} ~{avg * (total - n):.1f}s left")
 
     cap.release()
     out.release()
-    print(f"Done! Saved your new video to {output_path}")
+    add_audio(ascii_path, input_file_path, output_path)
+
+    print("Done:", output_path)
 
 if __name__ == "__main__":
-    convert("input.mp4", "ascii_output.mp4", cols=200)
-    
+    convert("robot", cols=250)
     
