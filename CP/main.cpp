@@ -5,14 +5,13 @@
 #include <stack>
 
 enum Op : uint8_t {
-    MOV, MOVI, ADD, ADDI, SUB, SUBI, MUL, MULI, JMP, PRINT, PRINTI, HALT
+    MOV, MOVI, ADD, ADDI, SUB, SUBI, MUL, INC, DEC, MULI, JMP, JL, PRINT, PRINTI, HALT
 };
 
 struct Instruction {
     Op op;
     int64_t a = 0;
     int64_t b = 0;
-    int64_t c = 0;
 };
 
 void run(const std::vector<Instruction>& code) {
@@ -35,7 +34,14 @@ void run(const std::vector<Instruction>& code) {
             case SUBI: regs[ins.a] -= ins.b; break;
             case MUL: regs[ins.a] *= regs[ins.b]; break;
             case MULI: regs[ins.a] *= ins.b; break;
+            case INC: regs[ins.a]++; break;
+            case DEC: regs[ins.a]--; break;
             case JMP: ip = ins.a - 1; break;
+            case JL: {
+                if (regs[0] < regs[1])
+                    ip = ins.a - 1;
+                break;
+            }
             case PRINT: {
                 printf("%lld\n", static_cast<long long>(regs[ins.a]));
                 break;
@@ -52,10 +58,11 @@ void run(const std::vector<Instruction>& code) {
 
 int main() {
     std::vector<Instruction> program = {
-        {PRINTI, 3},
-        {PRINTI, 2},
-        {PRINTI, 1},
-        {JMP, 0},
+        {MOVI, 0, 0},
+        {MOVI, 1, 100},
+        {PRINT, 0},
+        {INC, 0},
+        {JL, 2},
         {HALT}
     };
 
