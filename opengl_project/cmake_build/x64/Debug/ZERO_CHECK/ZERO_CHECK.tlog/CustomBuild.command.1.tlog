@@ -1,0 +1,10 @@
+^C:\USERS\BRONDUM\DOCUMENTS\GITHUB\PYTHON\VULKAN_PROJECT\CMAKE_BUILD\CMAKEFILES\8BB48766CCB72D34102B0FF5BED5FEFE\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Brondum/Documents/GitHub/Python/vulkan_project -BC:/Users/Brondum/Documents/GitHub/Python/vulkan_project/cmake_build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Brondum/Documents/GitHub/Python/vulkan_project/cmake_build/OpenGLProject.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/vcpkg/installed/x64-windows/include"
+            ],
+            "cppStandard": "c++23"
+        }
+    ],
+    "version": 4
+}
