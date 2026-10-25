@@ -1,0 +1,6 @@
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/CMakeFiles/game.dir
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/CMakeFiles/edit_cache.dir
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/CMakeFiles/rebuild_cache.dir
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/utils/CMakeFiles/imgui.dir
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/utils/CMakeFiles/edit_cache.dir
+C:/Users/Brondum/Documents/GitHub/Python/CP/cmake_build/utils/CMakeFiles/rebuild_cache.dir
