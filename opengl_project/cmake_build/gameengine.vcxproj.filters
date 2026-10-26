@@ -1,16 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Brondum\Documents\GitHub\Python\vulkan_project\main.cpp">
+    <ClCompile Include="C:\GitHub\Python\opengl_project\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GitHub\Python\opengl_project\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Brondum\Documents\GitHub\Python\vulkan_project\CMakeLists.txt" />
+    <CustomBuild Include="C:\GitHub\Python\opengl_project\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{EADC80B6-8363-3CE3-A83D-05686F15D93C}</UniqueIdentifier>
+      <UniqueIdentifier>{23561680-8C6D-3EFA-9630-F532DDFDA5E8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ find_package(glad REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 # Define your executable name and source file
-add_executable(gameengine main.cpp)
+add_executable(gameengine main.cpp shader.cpp)
 
 # Link GLFW, GLAD, and GLM to your app
 target_link_libraries(gameengine PRIVATE 

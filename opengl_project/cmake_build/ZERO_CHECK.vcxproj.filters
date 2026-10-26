@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Brondum\Documents\GitHub\Python\vulkan_project\cmake_build\CMakeFiles\8bb48766ccb72d34102b0ff5bed5fefe\generate.stamp.rule">
+    <CustomBuild Include="C:\GitHub\Python\opengl_project\cmake_build\CMakeFiles\b8502de9d5a2c4130fbb32975cb6426d\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{3817832E-33F3-3592-9BD6-EFF58E2D6562}</UniqueIdentifier>
+      <UniqueIdentifier>{454FA2DF-04BF-378F-94D2-F1FD46A5DE8E}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

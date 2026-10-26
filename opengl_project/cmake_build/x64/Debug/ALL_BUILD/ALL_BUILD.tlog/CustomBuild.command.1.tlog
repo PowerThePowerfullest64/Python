@@ -1,6 +1,6 @@
-^C:\USERS\BRONDUM\DOCUMENTS\GITHUB\PYTHON\VULKAN_PROJECT\CMAKELISTS.TXT
+^C:\GITHUB\PYTHON\OPENGL_PROJECT\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Brondum/Documents/GitHub/Python/vulkan_project -BC:/Users/Brondum/Documents/GitHub/Python/vulkan_project/cmake_build --check-stamp-file C:/Users/Brondum/Documents/GitHub/Python/vulkan_project/cmake_build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/GitHub/Python/opengl_project -BC:/GitHub/Python/opengl_project/cmake_build --check-stamp-file C:/GitHub/Python/opengl_project/cmake_build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
