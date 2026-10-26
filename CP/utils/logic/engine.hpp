@@ -15,7 +15,7 @@ using Seconds = std::chrono::duration<double>;
 class Engine {
 public:
     // Updates input and events.
-    static inline bool PollEvents() {
+    static inline void PollEvents(bool& running_state) {
         float scroll = 0.f;
         SDL_Event event;
 
@@ -26,10 +26,11 @@ public:
             switch (event.type)
             {
             case SDL_EVENT_QUIT:
-                return false;
+                running_state = false;
+                break;
             case SDL_EVENT_KEY_DOWN:
                 if (event.key.scancode == SDL_SCANCODE_ESCAPE)
-                    return false;
+                    running_state = false;
                 break;
             case SDL_EVENT_MOUSE_WHEEL:
                 scroll = event.wheel.y;
@@ -40,8 +41,6 @@ public:
         }
 
         Input::Update(scroll);
-
-        return true;
     }
 
     // Should be at start of game loop. Calculates delta time as well as other frame information.
