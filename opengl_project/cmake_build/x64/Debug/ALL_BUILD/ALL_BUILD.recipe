@@ -2,13 +2,13 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\GitHub\Python\opengl_project\cmake_build\x64\Debug\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\Brondum\Documents\GitHub\Python\opengl_project\cmake_build\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\GitHub\Python\opengl_project\cmake_build\Debug\gameengine.exe</FullPath>
+      <FullPath>C:\Users\Brondum\Documents\GitHub\Python\opengl_project\cmake_build\Debug\gameengine.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\GitHub\Python\opengl_project\cmake_build\x64\Debug\ALL_BUILD</FullPath>
+      <FullPath>C:\Users\Brondum\Documents\GitHub\Python\opengl_project\cmake_build\x64\Debug\ALL_BUILD</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
