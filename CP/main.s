@@ -1,37 +1,83 @@
 	.file	"main.cpp"
 	.text
-	.section .rdata,"dr"
-.LC0:
-	.ascii "\12\0"
-	.section	.text.startup,"x"
-	.p2align 4
 	.globl	main
 	.def	main;	.scl	2;	.type	32;	.endef
 	.seh_proc	main
 main:
-.LFB2811:
-	subq	$40, %rsp
-	.seh_stackalloc	40
+.LFB2569:
+	pushq	%rbp
+	.seh_pushreg	%rbp
+	movq	%rsp, %rbp
+	.seh_setframe	%rbp, 0
+	subq	$48, %rsp
+	.seh_stackalloc	48
 	.seh_endprologue
 	call	__main
-	movq	.refptr._ZSt4cout(%rip), %rcx
-	movl	$1000000000, %edx
-	call	_ZNSo9_M_insertIyEERSoT_
-	movl	$1, %r8d
-	leaq	.LC0(%rip), %rdx
+	movl	$5, -4(%rbp)
+	leaq	-4(%rbp), %rax
 	movq	%rax, %rcx
-	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_x
-	xorl	%eax, %eax
-	addq	$40, %rsp
+	call	_Z4add1IiEvRT_
+	movss	.LC0(%rip), %xmm0
+	movss	%xmm0, -8(%rbp)
+	leaq	-8(%rbp), %rax
+	movq	%rax, %rcx
+	call	_Z4add1IfEvRT_
+	movl	$0, %eax
+	addq	$48, %rsp
+	popq	%rbp
 	ret
 	.seh_endproc
+	.section	.text$_Z4add1IiEvRT_,"x"
+	.linkonce discard
+	.globl	_Z4add1IiEvRT_
+	.def	_Z4add1IiEvRT_;	.scl	2;	.type	32;	.endef
+	.seh_proc	_Z4add1IiEvRT_
+_Z4add1IiEvRT_:
+.LFB2846:
+	pushq	%rbp
+	.seh_pushreg	%rbp
+	movq	%rsp, %rbp
+	.seh_setframe	%rbp, 0
+	.seh_endprologue
+	movq	%rcx, 16(%rbp)
+	movq	16(%rbp), %rax
+	movl	(%rax), %eax
+	leal	1(%rax), %edx
+	movq	16(%rbp), %rax
+	movl	%edx, (%rax)
+	nop
+	popq	%rbp
+	ret
+	.seh_endproc
+	.section	.text$_Z4add1IfEvRT_,"x"
+	.linkonce discard
+	.globl	_Z4add1IfEvRT_
+	.def	_Z4add1IfEvRT_;	.scl	2;	.type	32;	.endef
+	.seh_proc	_Z4add1IfEvRT_
+_Z4add1IfEvRT_:
+.LFB2847:
+	pushq	%rbp
+	.seh_pushreg	%rbp
+	movq	%rsp, %rbp
+	.seh_setframe	%rbp, 0
+	.seh_endprologue
+	movq	%rcx, 16(%rbp)
+	movq	16(%rbp), %rax
+	movss	(%rax), %xmm1
+	movss	.LC1(%rip), %xmm0
+	addss	%xmm1, %xmm0
+	movq	16(%rbp), %rax
+	movss	%xmm0, (%rax)
+	nop
+	popq	%rbp
+	ret
+	.seh_endproc
+	.section .rdata,"dr"
+	.align 4
+.LC0:
+	.long	1084227584
+	.align 4
+.LC1:
+	.long	1065353216
 	.def	__main;	.scl	2;	.type	32;	.endef
-	.ident	"GCC: (Rev5, Built by MSYS2 project) 16.1.0"
-	.def	_ZNSo9_M_insertIyEERSoT_;	.scl	2;	.type	32;	.endef
-	.def	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_x;	.scl	2;	.type	32;	.endef
-	.section	.rdata$.refptr._ZSt4cout, "dr"
-	.p2align	3, 0
-	.globl	.refptr._ZSt4cout
-	.linkonce	discard
-.refptr._ZSt4cout:
-	.quad	_ZSt4cout
+	.ident	"GCC: (Rev8, Built by MSYS2 project) 15.2.0"

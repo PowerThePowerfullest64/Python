@@ -1,15 +1,18 @@
 #include <iostream>
 #include <vector>
 
-template<typename T, typename... Args>
-T Construct(Args... args) {
-    return T(args...);
+template<typename T>
+void add1(T& val) {
+    val++;
 }
 
+
+
 int main() {
-    std::vector<int> v = Construct<std::vector<int>>(std::initializer_list<int>{5, 1, 15});
-    for (int n : v)
-        std::cout << n << " ";
+    int e = 5;
+    add1(e);
+    float num = 5.f;
+    add1(num);
 
     return 0;
 }
