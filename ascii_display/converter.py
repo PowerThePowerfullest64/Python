@@ -42,7 +42,7 @@ def convert(input_file_path: str, output_path="", cols=100):
         output_path = input_file_path + str(cols)
     output_path += ".mp4"
     input_file_path = "input_" + input_file_path + ".mp4"
-    print(output_path)
+    print(f"Making {output_path}...")
 
     cap = cv2.VideoCapture(input_file_path)
     if not cap.isOpened():
@@ -74,10 +74,18 @@ def convert(input_file_path: str, output_path="", cols=100):
 
         small = cv2.resize(frame, (cols, rows), interpolation=cv2.INTER_NEAREST)
         gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
-        idx = gray // 4
+        
+        idx = ((gray / 255.0) ** 0.85 * 255).astype(np.uint8) // 4
+
+        hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV).astype(np.float32)
+        hsv[..., 1] = np.clip(hsv[..., 1] * 1.5, 0, 255)
+        hsv[..., 2] = np.clip(hsv[..., 2] * 1.2 + 15, 0, 255)
+        bright = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
 
         mask = atlas[idx].transpose(0, 2, 1, 3).reshape(rows * ch, cols * cw)
-        color = cv2.resize(small, (cols * cw, rows * ch), interpolation=cv2.INTER_NEAREST)
+        
+        mask = np.clip(mask * 1.5, 0, 1)  # optional: bolder strokes
+        color = cv2.resize(bright, (cols * cw, rows * ch), interpolation=cv2.INTER_NEAREST)
 
         img = (color * mask[:, :, None]).astype(np.uint8)[:out_h, :out_w]
         out.write(img)
@@ -91,8 +99,18 @@ def convert(input_file_path: str, output_path="", cols=100):
     out.release()
     add_audio(ascii_path, input_file_path, output_path)
 
-    print("Done:", output_path)
+    print("Done making", output_path)
 
 if __name__ == "__main__":
-    convert("robot", cols=250)
+    name = input("File name without input_: ")
+    cols = 0
+    while (True):
+        try:
+            cols = int(input("How many coloms should the output have? "))
+        except:
+            print("Columns are given as an integer. Try again.")
+            continue
+        break
+    convert(name, cols=cols)
+    input("\nPress enter to exit...")
     
