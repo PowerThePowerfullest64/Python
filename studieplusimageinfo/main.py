@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from time import time
 
 import math
 
@@ -21,6 +22,8 @@ def str_to_bits(message: str) -> str:
     return bits
 
 def write_image(message: str, output_path: str, width: int, height: int = None, chunk_size: int = 4): #🤫 dont tell studie+
+    start = time()
+
     MAGIC_HEADER = "01010100111100011011100101101010"
     LENGTH_BIT_COUNT = 64
 
@@ -64,7 +67,12 @@ def write_image(message: str, output_path: str, width: int, height: int = None, 
     
     cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 50])
 
+    duration = time() - start
+    print(f"Image successfully encoded in {duration} s.")
+
 def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
+    start = time()
+
     MAGIC_HEADER = "01010100111100011011100101101010"
     LENGTH_BIT_COUNT = 64
 
@@ -105,10 +113,13 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
 
     with open(output_path, "w") as f:
         f.write(bits)
+
+    duration = time() - start
+    print(f"Image successfully decoded with length of {bit_length//8} bytes in {duration} s.")
         
 if __name__ == "__main__":
-    file = open("main.cpp", "r")
+    file = open("input.txt", "r", encoding="utf-8")
     message = file.read()
     file.close()
-    write_image(message, width=500, output_path="encoded.jpg")
-    read_image("encoded.jpg", "decoded.txt")
+    write_image(message, width=8000, output_path="encoded2.jpg", chunk_size=2)
+    read_image("encoded2.jpg", "decoded.txt", chunk_size=2)
