@@ -15,19 +15,14 @@ import getpass
 from os import path
 
 from playwright.sync_api import sync_playwright
-from pathlib import Path
+
+import info
+
+CHECK_IF_DEFAULT = True
 
 # ============================================================
 # OPSÆTNING - ret disse ved behov
 # ============================================================
-
-STUDIEPLUS_LOGIN_URL = "https://all.studieplus.dk/"
-BILLED_URL = "https://all.studieplus.dk/shared/brugerfoto?indi_id="
-BILLED_STI = "C:/GitHub/Python/studieplusscraper/billeder"
-
-# instkey for "AARHUS TECH" (instnr 281075). Findes i login-sidens JSON-data,
-# hvis du nogensinde skal skifte institution.
-INSTKEY = "630064991"
 
 # ============================================================
 # DEL 1: LOGIN + HENT SKEMA-SIDENS HTML (Playwright)
@@ -42,10 +37,10 @@ def log_ind(username, password):
     browser = p.chromium.launch(headless=True)
     page = browser.new_page()
 
-    print(f"[1] Går til {STUDIEPLUS_LOGIN_URL}")
-    page.goto(STUDIEPLUS_LOGIN_URL)
+    print(f"[1] Går til {info.STUDIEPLUS_LOGIN_URL}")
+    page.goto(info.STUDIEPLUS_LOGIN_URL)
 
-    page.evaluate(f"selectInst('{INSTKEY}')")
+    page.evaluate(f"selectInst('{info.INSTKEY}')")
     page.wait_for_timeout(500)
 
     print("[2] Klikker 'Unilogin og Lokalt login'")
@@ -87,26 +82,28 @@ def log_ind(username, password):
     print("✅ Login gennemført.")
     return page, browser, p
 
-
-def hent_billede(page, browser, p, r: int = 1000):
-    t = open("default_pic.jpg", "rb") # 134063
-    test_body = t.read()
-    t.close()
+def hent_billede(page, browser, p, r, should_print=False):
+    if CHECK_IF_DEFAULT:
+        t = open("default_pic.jpg", "rb") # 134063
+        test_body = t.read()
+        t.close()
     
     for i in range(r[0], r[1]):
-        print(f"Navigerer til billede side: {BILLED_URL}{i}")
+        if should_print:
+            print(f"Navigerer til billede side: {info.BILLED_URL}{i}")
         try:
-            response = page.goto(f"{BILLED_URL}{i}")
-            if response and response.body()[:100] != test_body[:100]:
-                with open(path.join(BILLED_STI, (str(i) + ".jpg")), "wb") as f:
+            response = page.goto(f"{info.BILLED_URL}{i}")
+            if response and ((CHECK_IF_DEFAULT and response.body()[:100] != test_body[:100]) or not CHECK_IF_DEFAULT):
+                with open(path.join(info.BILLED_STI, (str(i) + ".jpg")), "wb") as f:
                     f.write(response.body())
             if response.status == 401:
-                print(f"401 Error with {i}")
+                if should_print:
+                    print(f"401 Error with {i}")
                 page.screenshot(path=f"fejl_billede_side{i}.png", full_page=True)
         except Exception as e:
             print(f"    Navigation fejlede ({e}), venter 3 sek. og prøver igen...")
             page.wait_for_timeout(3000)
-            page.goto(f"{BILLED_URL}{i}")
+            page.goto(f"{info.BILLED_URL}{i}")
 
     page.wait_for_load_state("networkidle", timeout=30000)
     page.wait_for_timeout(3000)
@@ -123,7 +120,7 @@ if __name__ == "__main__":
     username = input("UniLogin brugernavn/kode: ")
     password = getpass.getpass("UniLogin password: ")
 
-    r = tuple
+    r = tuple()
     while True:
         try:
             r = (input("Range for search int, int: ").strip().split(","))
@@ -134,6 +131,11 @@ if __name__ == "__main__":
         except:
             print("\nPlease type 2 positive ints, first should be lower than the second!\n")
             time.sleep(1.5)
+    ans = input("CHECK_IF_DEFAULT: ").lower().strip()
+    if ans == "y" or ans == "yes" or ans == "true":
+        CHECK_IF_DEFAULT = True
+    else:
+        CHECK_IF_DEFAULT = False
 
     time_start = time.time()
     
@@ -141,6 +143,6 @@ if __name__ == "__main__":
     hent_billede(page, browser, p, r)
 
 
-    print(f"Gemt alle data i '{BILLED_STI}'")
+    print(f"Gemt alle data i '{info.BILLED_STI}'")
     print(f"Finished in : {round(time.time() - time_start, 2)} seconds)")
     print(f"With a avg of time of {(time.time() - time_start) / (r[1] - r[0])} per picture")
