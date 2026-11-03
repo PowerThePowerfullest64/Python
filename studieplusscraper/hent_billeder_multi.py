@@ -1,8 +1,9 @@
 from multiprocessing import Pool, current_process
 from getpass import getpass
-import time
+import time, os
 
-THREAD_COUNT = 16
+THREAD_COUNT = os.cpu_count() * 4
+print(f"Using: {THREAD_COUNT} threads.")
 
 def hent_billede_multi(username, password, r):
     from main import log_ind, hent_billede
@@ -27,7 +28,6 @@ def start_multi(username, password, r):
     time_start = time.time()
     with Pool(THREAD_COUNT) as p:
         p.starmap(hent_billede_multi, args)
-    elapsed = time.time() - time_start
 
     print("\n" * 5)
     print(f"Gemt alle data i '{info.BILLED_STI}'")
@@ -35,4 +35,4 @@ def start_multi(username, password, r):
     print(f"With a avg of time of {(time.time() - time_start) / (r[1] - r[0])} per picture")
 
 if __name__ == "__main__":
-    start_multi(input("UniLogin brugernavn: "), getpass("UniLogin password: "), (200000, 500000))
+    start_multi(input("UniLogin brugernavn: "), getpass("UniLogin password: "), (200000, 260000))
