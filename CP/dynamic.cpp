@@ -53,6 +53,9 @@ private:
 
 int main() {
     dyn d = 5.14f;
+    dyn pol = 4;
+    pol = 4.1f;
+    pol = true;
     
     std::cout << d.cast<float>();
 
