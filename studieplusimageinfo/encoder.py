@@ -63,7 +63,7 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
             bit_index += 1
 
             if bit_index % 10000 == 0:
-                print(f"Written {bit_index+1}/{bit_length} bits")
+                print(f"Written {bit_index}/{bit_length} bits")
     
     
     cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 50])
@@ -72,6 +72,11 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
     print(f"Image successfully encoded {bit_length} bits in {duration} s.")
 
 if __name__ == "__main__":
-    file = open("billeder.zip", "rb")
+    input_path = input("File to encode: ")
+    output_path = input("Encoded filename: ")
+    if output_path.split('.')[-1] != "jpg":
+        raise SyntaxError("Encoded filename must end in .jpg")
+    
+    file = open(input_path, "rb")
     data = file.read()
-    write_image(message=data, output_path="encoded.jpg", width=16000, chunk_size=2)
+    write_image(message=data, output_path=output_path, width=500, chunk_size=2)

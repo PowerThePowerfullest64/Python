@@ -68,4 +68,9 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
     print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to '{output_path}'")
 
 if __name__ == "__main__":
-    read_image(input_path="encoded.jpg", output_path="decoded.jpg", chunk_size=2)
+    input_path = input("File to decode: ")
+    if input_path.split('.')[-1] != "jpg":
+        raise SyntaxError("Decoded file must end in .jpg")
+    output_path = input("Decoded file: ")
+
+    read_image(input_path=input_path, output_path=output_path, chunk_size=2)
