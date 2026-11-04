@@ -35,4 +35,4 @@ def start_multi(username, password, r):
     print(f"With a avg of time of {(time.time() - time_start) / (r[1] - r[0])} per picture")
 
 if __name__ == "__main__":
-    start_multi(input("UniLogin brugernavn: "), getpass("UniLogin password: "), (200000, 260000))
+    start_multi(input("UniLogin brugernavn: "), getpass("UniLogin password: "), (208000, 400000))

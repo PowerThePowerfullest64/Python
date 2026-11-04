@@ -16,18 +16,39 @@ class InputSizeError(Exception):
 def str_to_bits(message: str) -> str:
     """Turns a string into a string of 0 and 1"""
     bytes = message.encode()
+    
+    return bytes_to_bits(bytes)
+
+def bytes_to_bits(bytes: bytes) -> str:
     bits = ""
     for i in range(len(bytes)):
         bits += f"{bytes[i]:08b}"
     return bits
 
-def write_image(message: str, output_path: str, width: int, height: int = None, chunk_size: int = 4): #🤫 dont tell studie+
+def bits_to_bytes(bits: str) -> bytes:
+    """""Turns bits into bytes"""
+    result = bytes()
+    for i in range(len(bits)//8):
+        byte = bytes([int(bits[i*8:(i+1)*8], 2)])
+        result += byte
+    return result
+
+def bits_to_str(bits: str) -> str:
+    """""Turns bits into string"""
+    text = ""
+    for i in range(len(bits)//8):
+        ch = chr(int(bits[i*8:(i+1)*8], 2))
+        text += ch
+    return text
+        
+
+def write_image(message: bytes, output_path: str, width: int, height: int = None, chunk_size: int = 4): #🤫 dont tell studie+
     start = time()
 
     MAGIC_HEADER = "01010100111100011011100101101010"
     LENGTH_BIT_COUNT = 64
 
-    bits = str_to_bits(message)
+    bits = bytes_to_bits(message)
     bit_length = len(MAGIC_HEADER) + LENGTH_BIT_COUNT + len(bits)
     length_bits = f"{bit_length:0{LENGTH_BIT_COUNT}b}"
     bits = MAGIC_HEADER + length_bits + bits
@@ -65,12 +86,12 @@ def write_image(message: str, output_path: str, width: int, height: int = None, 
             bit_index += 1
     
     
-    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 0])
 
     duration = time() - start
     print(f"Image successfully encoded in {duration} s.")
 
-def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
+def read_image(input_path: str, output_path: str, chunk_size: int = 4):
     start = time()
 
     MAGIC_HEADER = "01010100111100011011100101101010"
@@ -86,7 +107,6 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
     bits_height = height // chunk_size
 
     total_color = np.zeros(3)
-    text = ""
     bits = ""
     for by in range(bits_height):
         for bx in range(bits_width):
@@ -100,6 +120,8 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
             avg_color = total_color / chunk_size**2
             brightness = (avg_color[0] + avg_color[1] + avg_color[2]) / 3
             bits += '1' if brightness >= 128 else '0'
+        if by % 1000 == 0:
+            print(f"Lines already read: {by}/{bits_height}")
 
     if bits[:len(MAGIC_HEADER)] != MAGIC_HEADER:
         raise NoHeaderError("Input image file has no header.")
@@ -111,15 +133,18 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
 
     bits = bits[len(MAGIC_HEADER) + LENGTH_BIT_COUNT:bit_length]
 
-    with open(output_path, "w") as f:
-        f.write(bits)
+    byte_data = bits_to_bytes(bits)
+
+    print(f"Beginning to write bytes to {output_path}")
+    with open(output_path, "wb") as f:
+        f.write(byte_data)
 
     duration = time() - start
-    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s.")
+    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to{output_path}")
         
 if __name__ == "__main__":
-    file = open("input.txt", "r", encoding="utf-8")
+    file = open("catclapping.mp4", "rb")
     message = file.read()
     file.close()
-    write_image(message, width=500, output_path="encoded2.jpg", chunk_size=2)
-    read_image("encoded2.jpg", "decoded.txt", chunk_size=2)
+    write_image(message, width=500, output_path="encoded.jpg", chunk_size=2)
+    read_image("encoded.jpg", "decodedcat.mp4", chunk_size=2)
