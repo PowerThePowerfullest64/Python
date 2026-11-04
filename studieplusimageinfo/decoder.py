@@ -9,19 +9,16 @@ class InvalidLengthError(Exception):
     pass
 
 def bits_to_bytes(bits: str) -> bytes:
-    """""Turns bits into bytes"""
-    result = bytes()
-    for i in range(len(bits)//8):
-        byte = bytes([int(bits[i*8:(i+1)*8], 2)])
-        result += byte
-    return result
+    """Turns bits into bytes."""
+    limit = (len(bits) // 8) * 8
+    return bytes(int(bits[i:i+8], 2) for i in range(0, limit, 8))
 
 def read_image(input_path: str, output_path: str, chunk_size: int = 4):
     start = time()
 
     MAGIC_HEADER = "01010100111100011011100101101010"
     LENGTH_BIT_COUNT = 64
-
+    
     image = cv2.imread(input_path)
     if image is None:
         raise FileNotFoundError(f"Could not read image: {input_path}")
@@ -33,7 +30,7 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
 
     total_color = np.zeros(3)
     bits = ""
-    for by in range(bits_height):
+    for by in range(bits_height): #Make ts faster (todo/fix)
         for bx in range(bits_width):
             total_color = np.zeros(3)
 
@@ -71,6 +68,6 @@ if __name__ == "__main__":
     input_path = input("File to decode: ")
     if input_path.split('.')[-1] != "jpg":
         raise SyntaxError("Decoded file must end in .jpg")
-    output_path = input("Decoded file: ")
+    output_path = input("Decoded filename: ")
 
     read_image(input_path=input_path, output_path=output_path, chunk_size=2)

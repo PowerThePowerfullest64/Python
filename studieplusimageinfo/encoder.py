@@ -7,14 +7,18 @@ import math
 class InputSizeError(Exception):
     pass
 
+class TooLargeJpgError(Exception):
+    """Either the jpg is to tall or wide"""
+    pass
+
 def bytes_to_bits(bytes: bytes) -> str:
-    bits = ""
-    for i in range(len(bytes)):
-        bits += f"{bytes[i]:08b}"
-    return bits      
+    return  "".join([f"{bytes[i]:08b}" for i in range(len(bytes))])
 
 def write_image(message: bytes, output_path: str, width: int, height: int = None, chunk_size: int = 4): #🤫 dont tell studie+
     start = time()
+
+    if width % 2 != 0:
+        raise InputSizeError("Width cannot be an odd number")
 
     MAGIC_HEADER = "01010100111100011011100101101010"
     LENGTH_BIT_COUNT = 64
@@ -24,11 +28,16 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
     length_bits = f"{bit_length:0{LENGTH_BIT_COUNT}b}"
     bits = MAGIC_HEADER + length_bits + bits
 
-    print(f"Calculated bit length of {bit_length} bits")
+    print(f"Calculated bit length of data to {bit_length} bits")
 
     if height == None:
         height = int(math.ceil(len(bits) / width * chunk_size) * chunk_size)
 
+    if height > 2**16:
+        raise TooLargeJpgError(f"Height of the JPG was over the limit of {2**16} pixels ({height} pixels)")
+    if width > 2**16:
+        raise TooLargeJpgError(f"Width of the JPG was over the limit of {2**16} pixels ({width} pixels)")
+    
     print(f"Image resolution is {width}x{height} pixels")
     
     image = np.zeros((height, width, 3), dtype=np.uint8)
@@ -42,7 +51,7 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
 
     if len(bits) > bit_capacity:
         raise InputSizeError(f"Input file too big for image. Image supports only {bit_capacity} bits but was given {len(bits)} bits")
-
+    
     print(f"Image bit-capacity is {bit_capacity} bits.")
     print(f"Message size is {len(bits)} bits.")
 
@@ -61,12 +70,11 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
                     row[px:px+chunk_size] = (255,255,255)
 
             bit_index += 1
-
-            if bit_index % 10000 == 0:
-                print(f"Written {bit_index}/{bit_length} bits")
+            if bit_index % (bit_length // 100) == 0 and bit_length > 10000:
+                print(f"Written {round(bit_index/bit_length * 100)}% bits")
     
     
-    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 5])
 
     duration = time() - start
     print(f"Image successfully encoded {bit_length} bits in {duration} s.")
