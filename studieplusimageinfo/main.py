@@ -86,7 +86,7 @@ def write_image(message: bytes, output_path: str, width: int, height: int = None
             bit_index += 1
     
     
-    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 0])
+    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, 50])
 
     duration = time() - start
     print(f"Image successfully encoded in {duration} s.")
@@ -120,9 +120,9 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
             avg_color = total_color / chunk_size**2
             brightness = (avg_color[0] + avg_color[1] + avg_color[2]) / 3
             bits += '1' if brightness >= 128 else '0'
-        if by % 1000 == 0:
+        if by % 500 == 0:
             print(f"Lines already read: {by}/{bits_height}")
-
+    print(f"Lines already read: {bits_height}/{bits_height}")
     if bits[:len(MAGIC_HEADER)] != MAGIC_HEADER:
         raise NoHeaderError("Input image file has no header.")
 
@@ -140,7 +140,7 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
         f.write(byte_data)
 
     duration = time() - start
-    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to{output_path}")
+    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to '{output_path}'")
         
 if __name__ == "__main__":
     file = open("catclapping.mp4", "rb")
