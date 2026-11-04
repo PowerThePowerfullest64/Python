@@ -115,11 +115,11 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4) -> str:
         f.write(bits)
 
     duration = time() - start
-    print(f"Image successfully decoded with length of {bit_length//8} bytes in {duration} s.")
+    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s.")
         
 if __name__ == "__main__":
     file = open("input.txt", "r", encoding="utf-8")
     message = file.read()
     file.close()
-    write_image(message, width=8000, output_path="encoded2.jpg", chunk_size=2)
+    write_image(message, width=500, output_path="encoded2.jpg", chunk_size=2)
     read_image("encoded2.jpg", "decoded.txt", chunk_size=2)
