@@ -20,6 +20,7 @@ print("Finished loggin in.")
 
 time.sleep(1)
 os.system("cls")
+os.system("title " + f"Messages from '{receiver_id}'")
 
 print("Output terminal for messages.")
 print(f"Messages from the id '{receiver_id}' will be received here.\n")

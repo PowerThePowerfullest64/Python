@@ -20,6 +20,7 @@ print("Finished loggin in.")
 
 time.sleep(1)
 os.system("cls") # MAKE CLEAR A THING!
+os.system("title " + "input")
 
 print("Input terminal for messages.\n")
 
