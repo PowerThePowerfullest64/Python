@@ -32,7 +32,7 @@ while True:
             message, message_time = result
 
             seconds_day = message_time % (3600 * 24)
-            hours = seconds_day // 3600 + 1 # + 1 is to offset to UTC+1
+            hours = seconds_day // 3600 + 1 # + 1 is to offset to UTC+1 (thats denmark)
             minutes = seconds_day % 3600 // 60
             seconds = seconds_day % 3600 % 60
 
