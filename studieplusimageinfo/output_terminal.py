@@ -24,9 +24,8 @@ os.system("cls")
 print("Output terminal for messages.")
 print(f"Messages from the id '{receiver_id}' will be received here.\n")
 
-start_time = 0
 while True:
-    if time.time() - start_time >= 1:
+    try:
         encoded = messenger.handler.get_image(receiver_id)
         result = messenger.received_message(encoded)
         if result is not None:
@@ -38,5 +37,8 @@ while True:
             seconds = seconds_day % 3600 % 60
 
             print(f"From {receiver_id} ({hours:02d}:{minutes:02d}:{seconds:02d}): {message}")
-        
-        start_time = time.time()
+
+    except Exception as e:
+        print(f"Error fetching message: {e}")
+
+    time.sleep(1)
