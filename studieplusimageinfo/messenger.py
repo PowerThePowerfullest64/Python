@@ -33,6 +33,9 @@ class Messenger:
             f.write(encoded)
         
         decoded = read_image(tmp_filename, make_file=False)
+        if decoded is None:
+            os.remove(tmp_filename)
+            return
         decoded_time = int.from_bytes(decoded[:4], byteorder="little")
         decoded = decoded[4:]
 

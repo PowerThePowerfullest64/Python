@@ -14,7 +14,6 @@ class StudiePlusHandler:
         self.user_page: Page = self.log_ind(username, password)
         self.receiver_page: Page = self.log_ind(username, password)
 
-        
 
     def log_ind(self, username, password) -> Page:
         """
@@ -68,7 +67,7 @@ class StudiePlusHandler:
         if "all.studieplus.dk" not in user_page.url or "login" in user_page.url.lower():
             print("    Venter 5 sek. ekstra, ifald redirectet bare er langsomt...")
             user_page.wait_for_timeout(5000)
-            if "all.studieplus.dk" not in self.receiver_page.url or "login" in user_page.url.lower():
+            if "all.studieplus.dk" not in user_page.url or "login" in user_page.url.lower():
                 user_page.screenshot(path="login_fejl_screenshot.png", full_page=True)
                 raise RuntimeError(
                     f"Login lykkedes tilsyneladende ikke - endte på {user_page.url}. "
