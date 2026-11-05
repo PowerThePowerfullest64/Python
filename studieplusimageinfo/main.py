@@ -1,6 +1,7 @@
 from messenger import Messenger
 from getpass import getpass
 import subprocess, sys
+import time
 
 print("\nPlease input your Unilogin credentials (We will not steal it 😉)")
 print("-----------------------------------------------------------------\n")
@@ -23,6 +24,7 @@ while True:
 package = f"{user_id},{username},{password}"
 
 # create a new window, for output
-subprocess.Popen([sys.executable, "output_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)
 subprocess.Popen([sys.executable, "input_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)
+time.sleep(2) # open this one a little later
+subprocess.Popen([sys.executable, "output_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)
 

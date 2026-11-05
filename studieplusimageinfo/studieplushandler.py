@@ -80,7 +80,7 @@ class StudiePlusHandler:
         user_page.goto(self.USER_URL)
         return user_page
     
-    def get_image(self, receiver_id: int):
+    def get_image(self, receiver_id: int) -> bytes:
         read_bytes: bytes = bytes()
         if self.do_print:
             print(f"Navigerer til billede side: {self.BILLED_URL}{receiver_id}")

@@ -18,13 +18,25 @@ print("Logging in...")
 messenger = Messenger(username, password)
 print("Finished loggin in.")
 
-time.sleep(0.75)
-os.system("clear") # MAKE CLEAR A THING!
+time.sleep(1)
+os.system("cls")
 
 print("Output terminal for messages.")
 print(f"Messages from the id '{receiver_id}' will be received here.\n")
 
+start_time = 0
 while True:
-    # messenger.handler.get_image()
-    # messenger.received_message()
-    pass
+    if time.time() - start_time >= 1:
+        encoded = messenger.handler.get_image(receiver_id)
+        result = messenger.received_message(encoded)
+        if result is not None:
+            message, message_time = result
+
+            seconds_day = message_time % (3600 * 24)
+            hours = seconds_day // 3600 + 1 # + 1 is to offset to UTC+1
+            minutes = seconds_day % 3600 // 60
+            seconds = seconds_day % 3600 % 60
+
+            print(f"From {receiver_id} ({hours:02d}:{minutes:02d}:{seconds:02d}): {message}")
+        
+        start_time = time.time()
