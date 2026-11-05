@@ -8,17 +8,25 @@ class NoHeaderError(Exception):
 class InvalidLengthError(Exception):
     pass
 
-def bits_to_bytes(bits: str) -> bytes:
+def strbits_to_bytes(bits: str) -> bytes:
     """Turns bits into bytes."""
     limit = (len(bits) // 8) * 8
     return bytes(int(bits[i:i+8], 2) for i in range(0, limit, 8))
 
-def read_image(input_path: str, output_path: str, chunk_size: int = 4):
-    start = time()
+def bits_to_bytes(bits: np.ndarray) -> bytes:
+    n_bytes = len(bits) // 8
+    return np.packbits(bits[:n_bytes * 8]).tobytes()
 
-    MAGIC_HEADER = "01010100111100011011100101101010"
-    LENGTH_BIT_COUNT = 64
+def read_image(input_path: str, output_path: str = "", chunk_size: int = 2, make_file: bool = True, do_print: bool = False) -> bytes | None:
+    start = time()
     
+    if make_file and output_path == "":
+        raise NameError(f"read_image() in decoder.py cannot write to a file with no name. Please provide a name to the output_path")
+
+    MAGIC_HEADER_STR = "01010100111100011011100101101010"
+    MAGIC_HEADER = np.fromiter(MAGIC_HEADER_STR, dtype=np.uint8)
+    LENGTH_BIT_COUNT = 64
+
     image = cv2.imread(input_path)
     if image is None:
         raise FileNotFoundError(f"Could not read image: {input_path}")
@@ -28,28 +36,17 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
     bits_width = width // chunk_size
     bits_height = height // chunk_size
 
-    total_color = np.zeros(3)
-    bits = ""
-    for by in range(bits_height): #Make ts faster (todo/fix)
-        for bx in range(bits_width):
-            total_color = np.zeros(3)
+    blocks = image.reshape(bits_height, chunk_size, bits_width, chunk_size, 3)
+    brightness = blocks.mean(axis=(1, 3, 4))
 
-            px, py = bx * chunk_size, by * chunk_size
-            rows = image[py:py+chunk_size]
-            for row in rows:
-                for i in row[px:px+chunk_size]:
-                    total_color += i
-            avg_color = total_color / chunk_size**2
-            brightness = (avg_color[0] + avg_color[1] + avg_color[2]) / 3
-            bits += '1' if brightness >= 128 else '0'
-        if by % 500 == 0:
-            print(f"Lines already read: {by}/{bits_height}")
-    print(f"Lines already read: {bits_height}/{bits_height}")
-    if bits[:len(MAGIC_HEADER)] != MAGIC_HEADER:
+    bits = (brightness >= 128).astype(np.uint8).ravel()
+
+    if not np.array_equal(bits[:len(MAGIC_HEADER)], MAGIC_HEADER):
         raise NoHeaderError("Input image file has no header.")
 
     length_bits = bits[len(MAGIC_HEADER):len(MAGIC_HEADER) + LENGTH_BIT_COUNT]
-    bit_length = int(length_bits, 2)
+    bit_length = int.from_bytes(np.packbits(length_bits).tobytes(), byteorder="big")
+
     if bit_length < len(MAGIC_HEADER) or bit_length > len(bits):
         raise InvalidLengthError("Image input file did not specify its length correctly.")
 
@@ -57,12 +54,20 @@ def read_image(input_path: str, output_path: str, chunk_size: int = 4):
 
     byte_data = bits_to_bytes(bits)
 
-    print(f"Beginning to write bytes to {output_path}")
-    with open(output_path, "wb") as f:
-        f.write(byte_data)
+    if make_file:
+        if do_print:
+            print(f"Beginning to write bytes to {output_path}")
+        with open(output_path, "wb") as f:
+            f.write(byte_data)
 
     duration = time() - start
-    print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to '{output_path}'")
+    if do_print:
+        print(f"Image successfully decoded with length of {len(bits)//8} bytes in {duration} s to '{output_path}'")
+
+    if make_file:
+        return
+    else:
+        return byte_data
 
 if __name__ == "__main__":
     input_path = input("File to decode: ")
