@@ -42,7 +42,9 @@ def read_image(input_path: str, output_path: str = "", chunk_size: int = 2, make
     bits = (brightness >= 128).astype(np.uint8).ravel()
 
     if not np.array_equal(bits[:len(MAGIC_HEADER)], MAGIC_HEADER):
-        raise NoHeaderError("Input image file has no header.")
+        if do_print:
+            print("Input image has no message header.")
+        return
 
     length_bits = bits[len(MAGIC_HEADER):len(MAGIC_HEADER) + LENGTH_BIT_COUNT]
     bit_length = int.from_bytes(np.packbits(length_bits).tobytes(), byteorder="big")
