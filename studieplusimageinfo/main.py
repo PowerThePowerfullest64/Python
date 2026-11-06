@@ -11,6 +11,7 @@ password = getpass()
 names = {
     "andreas": 195082,
     "anders": 150480,
+    "christian": 95222
 }
 
 while True: 
@@ -21,7 +22,8 @@ while True:
         user_id = names[user_id_raw]
     if user_id > 0:
         break
-package = f"{user_id},{username},{password}"
+seprator = ",@31_-x"
+package = f"{user_id}{seprator}{username}{seprator}{password}"
 
 # create a new window, for output
 subprocess.Popen([sys.executable, "input_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)

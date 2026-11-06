@@ -9,7 +9,7 @@ else:
     time.sleep(10)
     raise ValueError("Output terminal did not receive a receiver id as an argument.")
 
-args = package.split(',')
+args = package.split(",@31_-x")
 receiver_id: int = int(args[0])
 username: str = args[1]
 password: str = args[2]
