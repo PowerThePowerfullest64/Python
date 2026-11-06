@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+; Clean up old leftovers
+[-HKEY_CLASSES_ROOT\*\shell\RunMyScript]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\RunMyScript]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\RunMyScript]
+
+; Encoder: all files
+[HKEY_CLASSES_ROOT\*\shell\EncodeToJpg]
+@="Encode to JPG"
+
+[HKEY_CLASSES_ROOT\*\shell\EncodeToJpg\command]
+@="cmd.exe /c py \"C:\\Users\\Brondum\\Documents\\GitHub\\Python\\studieplusimageinfo\\encoder_fe.py\" \"%1\""

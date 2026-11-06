@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+; Decoder: .jpg
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\DecodeFromJpg]
+@="Decode from JPG"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\DecodeFromJpg\command]
+@="cmd.exe /c py \"C:\\Users\\Brondum\\Documents\\GitHub\\Python\\studieplusimageinfo\\decoder_fe.py\" \"%1\""
+
+; Decoder: .jpeg
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\DecodeFromJpeg]
+@="Decode from JPEG"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\DecodeFromJpeg\command]
+@="cmd.exe /c py \"C:\\Users\\Brondum\\Documents\\GitHub\\Python\\studieplusimageinfo\\decoder_fe.py\" \"%1\""
