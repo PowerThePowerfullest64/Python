@@ -28,5 +28,4 @@ package = f"{user_id}{seprator}{username}{seprator}{password}"
 # create a new window, for output
 subprocess.Popen([sys.executable, "input_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)
 time.sleep(2) # open this one a little later
-subprocess.Popen([sys.executable, "output_terminal.py", package], creationflags=subprocess.CREATE_NEW_CONSOLE)
 

@@ -4,9 +4,12 @@ import studieplushandler as sph
 import os
 import random
 import time
+
 class Messenger:
     def __init__(self, username: str, password: str):
+
         self.handler: sph.StudiePlusHandler = sph.StudiePlusHandler(username, password)
+
         self.last_encoded = ""
 
     def send_message(self, message: bytes):
