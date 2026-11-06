@@ -2,10 +2,7 @@ from time import time
 import cv2
 import numpy as np
 
-class NoHeaderError(Exception):
-    pass
-
-class InvalidLengthError(Exception):
+class InvalidHeaderError(Exception):
     pass
 
 def strbits_to_bytes(bits: str) -> bytes:
@@ -42,15 +39,13 @@ def read_image(input_path: str, output_path: str = "", chunk_size: int = 2, make
     bits = (brightness >= 128).astype(np.uint8).ravel()
 
     if not np.array_equal(bits[:len(MAGIC_HEADER)], MAGIC_HEADER):
-        if do_print:
-            print("Input image has no message header.")
-        return
+        raise InvalidHeaderError("Image input file did not format its header correctly.")
 
     length_bits = bits[len(MAGIC_HEADER):len(MAGIC_HEADER) + LENGTH_BIT_COUNT]
     bit_length = int.from_bytes(np.packbits(length_bits).tobytes(), byteorder="big")
 
     if bit_length < len(MAGIC_HEADER) or bit_length > len(bits):
-        raise InvalidLengthError("Image input file did not specify its length correctly.")
+        raise InvalidHeaderError("Image input file did not specify its length correctly.")
 
     bits = bits[len(MAGIC_HEADER) + LENGTH_BIT_COUNT:bit_length]
 
