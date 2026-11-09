@@ -102,7 +102,7 @@ class StudiePlusHandler:
 
     def change_profile_pic(self, path: str):
         with self.user_page.expect_file_chooser() as fc_info:
-            self.user_page.get_by_role("button", name="Skift billede").click()
+            self.user_page.get_by_role("button", name=" Skift billede ").click()
 
         file_chooser = fc_info.value
         file_chooser.set_files(path)
