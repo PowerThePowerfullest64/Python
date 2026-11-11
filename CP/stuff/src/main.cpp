@@ -1,143 +1,116 @@
 #include <iostream>
-#include <cstdio>
-#include <cstdint>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-constexpr std::string_view archive_ext = ".dns";
+std::vector<std::string> SplitByWhitespace(const std::string& s) {
+    std::vector<std::string> res;
 
-uint64_t GetFileSize(const std::string& inputPath) {
-    FILE* f = fopen(inputPath.c_str(), "rb");
-    if (f == nullptr) return -1;
-
-    fseek(f, 0L, SEEK_END);
-
-    uint64_t size = ftell(f);
-
-    fclose(f);
-
-    return size;
-}
-
-int PackFile(FILE* out, const std::string& name) {
-    uint64_t datasize = GetFileSize(name);
-    uint16_t namesize = name.size();
-
-    FILE* in = fopen(name.c_str(), "rb");
-    if (in == nullptr) return -1;
-
-    std::vector<char> data(datasize);
-    if (fread(data.data(), 1, datasize, in) != datasize) {
-        fclose(in);
-        return -1;
-    }
-
-    fwrite(&namesize, 2, 1, out);
-    fwrite(name.c_str(), 1, namesize, out);
-    fwrite(&datasize, 8, 1, out);
-    fwrite(data.data(), 1, datasize, out);
-
-    fclose(in);
-
-    return 0;
-}
-
-int UnpackFile(FILE* in, const fs::path& root_dir) {
-    uint64_t datasize;
-    uint16_t namesize;
-
-    if (fread(&namesize, 2, 1, in) != 1) {
-        if (feof(in)) return 1;
-
-        return -1;
-    }
-
-    std::string relative_name(namesize, '\0');
-    if (fread(&relative_name[0], 1, namesize, in) != namesize) return -1;
-
-    fread(&datasize, 8, 1, in);
-
-    std::vector<char> data(datasize);
-    if (datasize > 0) if (fread(data.data(), 1, datasize, in) != datasize) return -1;
-
-    fs::path final_output_path = root_dir / relative_name;
-
-    fs::path parent_folder = final_output_path.parent_path();
-    if (!parent_folder.empty()) {
-        fs::create_directories(parent_folder);
-    }
-
-    std::cout << "Unpacking: " << final_output_path.string() << "\n";
-
-    FILE* out = fopen(final_output_path.string().c_str(), "wb");
-    if (out == nullptr) {
-        std::cerr << "Failed to open output file: " << final_output_path.string() << "\n";
-        return -1;
-    }
-
-    if (datasize > 0)
-        fwrite(data.data(), 1, datasize, out);
-
-    fclose(out);
-    return 0;
-}
-
-int PackData(const std::string& name) {
-    fs::path root_dir = name;
-    fs::path root_name = root_dir.filename();
-
-    fs::path archive_path = fs::path(name);
-    archive_path += archive_ext;
-
-    FILE* out = fopen(archive_path.string().c_str(), "wb");
-    if (out == nullptr) return -1;
-
-    for (const auto& entry : fs::recursive_directory_iterator(root_dir)) {
-        if (entry.is_regular_file()) {
-            fs::path full_path = entry.path();
-
-            fs::path relative_inside_path = fs::relative(full_path, root_dir);
-            fs::path relative_with_root = root_name / relative_inside_path;
-
-            if (PackFile(out, relative_with_root.string()) == 0)
-                std::cout << "Archived file: '" << relative_with_root << "' successfully\n";
-            else {
-                std::cout << "Didn't archive file: " << relative_with_root.string() << " successfully\n";
-                fclose(out);
-                return -1;
+    bool inWord = false;
+    for (char c : s) {
+        if (c != ' ') {
+            if (!inWord) {
+                res.emplace_back(1, c);
+                inWord = true;
+            } else {
+                res.back() += c;
             }
+        } else {
+            inWord = false;
         }
     }
 
-    fclose(out);
-    return 0;
+    return res;
 }
 
-int UnpackData(const std::string& name) {
-    // remove archive extension
-    fs::path root_dir = name.substr(0, name.size() - archive_ext.size());
+void ProcessCommand(const std::string& input, bool& running, std::vector<std::string>& taskList) {
+    auto processedInput = SplitByWhitespace(input);
 
-    FILE* in = fopen(name.c_str(), "rb");
-    if (in == nullptr) return -1;
-
-    while (true) {
-        int code = UnpackFile(in, root_dir);
-        if (code == 1) break;
-        if (code == -1) {
-            std::cout << "Error unpacking file\n";
-            fclose(in);
-            return -1;
-        }
+    if (processedInput.size() == 0) {
+        return;
     }
 
-    fclose(in);
-    return 0;
+    std::string command = processedInput[0];
+
+    if (command == "exit" || command == "quit") {
+        running = false;
+        return;
+    } else if (command == "add" && processedInput.size() == 2) {
+        taskList.push_back(processedInput[1]);
+        return;
+    } else if (command == "list") {
+        if (taskList.size() == 0) {
+            std::cout << "No tasks to list.\n";
+            return;
+        }
+
+        for (int i = 0; i < taskList.size(); ++i)
+            std::cout << "[" << i+1 << "] " << taskList[i] << "\n";
+        return;
+    } else if (command == "done" && processedInput.size() == 2) {
+        if (processedInput[1] == "all") {
+            std::cout << "Marked all tasks as done.\n";
+            taskList.clear();
+            return;
+        }
+
+        int index;
+        try {
+            index = std::stoi(processedInput[1]) - 1;
+        } catch (const std::invalid_argument& e) {
+            std::cout << "'done' is followed by the number referring to your task, not the task itself.\n";
+            return;
+        }
+
+        if (index < 0 || index >= taskList.size()) {
+            std::cout << "'done' is followed by the number referring to your task, and is non-zero.\n";
+            return;
+        }
+
+        taskList.erase(taskList.begin()+index);
+        std::cout << "Marked task " << index+1 << " as done.\n";
+        return;
+    }
+
+    std::cout << "Command '" << command << "' not recognized or you provided invalid number of args.\n";
 }
 
 int main() {
-    //PackData("folder");
-    UnpackData("folder.dns");
+    std::cout << "----- COMMAND LINE INTERFACE -----\n";
+
+    bool running = true;
+    std::vector<std::string> taskList;
+
+    if (fs::exists("tasks.txt")) {
+        std::ifstream file("tasks.txt");
+        
+        std::string line;
+        while (std::getline(file, line)) {
+            taskList.push_back(line);
+        }
+
+        if (!file.eof()) {
+            std::cerr << "Something about reading tasks from tasks.txt failed...\n";
+        }
+
+        file.close();
+    }
+
+    while (running) {
+        std::string input;
+        std::cout << "> ";
+        std::getline(std::cin, input);
+
+        ProcessCommand(input, running, taskList);
+    }
+
+    std::ofstream file("tasks.txt");
+    for (const std::string& task : taskList)
+        file << task << "\n";
+    file.close();
+
+    std::cout << "----- END OF PROGRAM -----\n";
 }
