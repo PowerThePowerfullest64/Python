@@ -4,6 +4,8 @@
 #include <fstream>
 #include <filesystem>
 
+#include "commands.hpp"
+
 namespace fs = std::filesystem;
 
 std::vector<std::string> SplitByWhitespace(const std::string& s) {
@@ -34,48 +36,31 @@ void ProcessCommand(const std::string& input, bool& running, std::vector<std::st
     }
 
     std::string command = processedInput[0];
+    
+    // remove command from args
+    std::vector<std::string> args;
+
+    if (command.size() > 0)
+        for (int i = 1; i < processedInput.size(); ++i)
+            args.push_back(processedInput[i]);
+    
+    bool foundCommand = false;
 
     if (command == "exit" || command == "quit") {
         running = false;
-        return;
-    } else if (command == "add" && processedInput.size() == 2) {
-        taskList.push_back(processedInput[1]);
-        return;
-    } else if (command == "list") {
-        if (taskList.size() == 0) {
-            std::cout << "No tasks to list.\n";
-            return;
-        }
-
-        for (int i = 0; i < taskList.size(); ++i)
-            std::cout << "[" << i+1 << "] " << taskList[i] << "\n";
-        return;
-    } else if (command == "done" && processedInput.size() == 2) {
-        if (processedInput[1] == "all") {
-            std::cout << "Marked all tasks as done.\n";
-            taskList.clear();
-            return;
-        }
-
-        int index;
-        try {
-            index = std::stoi(processedInput[1]) - 1;
-        } catch (const std::invalid_argument& e) {
-            std::cout << "'done' is followed by the number referring to your task, not the task itself.\n";
-            return;
-        }
-
-        if (index < 0 || index >= taskList.size()) {
-            std::cout << "'done' is followed by the number referring to your task, and is non-zero.\n";
-            return;
-        }
-
-        taskList.erase(taskList.begin()+index);
-        std::cout << "Marked task " << index+1 << " as done.\n";
-        return;
+        foundCommand = true;
     }
 
-    std::cout << "Command '" << command << "' not recognized or you provided invalid number of args.\n";
+    for (Command& c : commands) {
+        if (c.IsCommand(command)) {
+            c.Execute(args, taskList);
+            foundCommand = true;
+            break;
+        }
+    }
+
+    if (!foundCommand)
+        std::cout << "Command '" << command << "' not recognized.\n";
 }
 
 int main() {
