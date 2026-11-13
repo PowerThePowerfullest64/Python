@@ -1,8 +1,8 @@
 #pragma once
 
-#include "vec3.hpp"
+#include "rtweekend.hpp"
 
-#include <iostream>
+#include "vec3.hpp"
 
 using color = vec3;
 
