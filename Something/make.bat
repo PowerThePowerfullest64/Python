@@ -1,0 +1,1 @@
+cmake -S . -B cmake_build -G "MinGW Makefiles"
