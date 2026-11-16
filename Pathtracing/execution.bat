@@ -1,0 +1,1 @@
+cmake_build\UnknownGame.exe > image.ppm
