@@ -1,0 +1,14 @@
+Something wrapped in ++ like +hello world+ means you should insert what is relevant to you in there.
+
+cmake_minimum_required(VERSION 3.24)
+project(+YOUR PROJECT NAME+ LANGUAGES CXX)
+
+add_subdirectory(utils)
+
+add_executable(+YOUR COMPILED EXE NAME (like game)+ +ALL YOUR SOURCE FILES (like main.cpp, dog.cpp)+)
+target_link_libraries(+YOUR COMPILED EXE NAME+ PRIVATE utils)
+
+add_custom_command(TARGET +YOUR COMPILED EXE NAME+ POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_RUNTIME_DLLS:+YOUR COMPILED EXE NAME+> $<TARGET_FILE_DIR:+YOUR COMPILED EXE NAME+>
+    COMMAND_EXPAND_LISTS)
