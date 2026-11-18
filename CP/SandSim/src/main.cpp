@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "utils/graphics/renderer.hpp"
 #include "utils/logic/engine.hpp"
@@ -31,6 +32,8 @@ int main() {
         Renderer::Clear(Colors::BLUE);
 
         world.Render();
+
+        Renderer::DrawText(Vec2(4, 4), "FPS: " + std::to_string(Engine::GetFPS()), Colors::WHITE, true);
 
         Renderer::EndFrame();
 
