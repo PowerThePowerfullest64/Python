@@ -42,4 +42,4 @@ while True:
     except Exception as e:
         print(f"Error fetching message: {e}")
 
-    time.sleep(1)
+    time.sleep(0.5)
