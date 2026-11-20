@@ -10,7 +10,7 @@ int main() {
     
     Renderer::Init(1600, 900, "Particle Simulation");
     //DONT CHANGE FPS WILL FLICKER UNDER 500!!!😠😠😠
-    Engine::SetFrameRate(0);
+    Engine::SetFrameRate(120);
 
     ParticleManager pm;
     
