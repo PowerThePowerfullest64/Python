@@ -22,11 +22,8 @@ public:
 
                 distx = x[j] - x[i];
                 disty = y[j] - y[i];
-                
-                if (disty > distx)
-                    std::swap(distx, disty);
 
-                dist = 1007/1024 * distx + 441/1024 * disty;
+                dist = std::sqrt(distx*distx + disty*disty);
                 if (dist == 0.0) continue; // ABORT!!
 
                 double direction = std::atan2(disty, distx);
