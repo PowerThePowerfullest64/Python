@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstring>
+#include <sstream>
 
 const char* kernelCode = R"(
 extern "C" __global__ void doubleNumbers(float* numbers) {
@@ -20,8 +20,7 @@ std::string CodeFromFile(const std::string& filepath) {
         return;
     }
 
-    std::string res;
-
+    // NOT DONE YET
 }
 
 void InitGPU() {
