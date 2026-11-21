@@ -1,86 +1,68 @@
-#include <cuda.h>
-#include <nvrtc.h>
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
 
-const char* kernelCode = R"(
-extern "C" __global__ void doubleNumbers(float* numbers) {
-    int i = threadIdx.x;
-    numbers[i] *= 2.0f;
-}
-)";
+#include "utils/graphics/renderer.hpp"
+#include "utils/logic/engine.hpp"
 
-std::string CodeFromFile(const std::string& filepath) {
-    std::ifstream file(filepath, std::ios::in);
-
-    if (!file.is_open()) {
-        std::cerr << "Could not open code file '" << filepath << "'!\n";
-        return;
-    }
-
-    // NOT DONE YET
-}
-
-void InitGPU() {
-    // 1. Start GPU
-    cuInit(0);
-    CUdevice device;
-    cuDeviceGet(&device, 0);
-    CUcontext ctx;
-    cuDevicePrimaryCtxRetain(&ctx, device);
-    cuCtxSetCurrent(ctx);
-}
-
-CUfunction CompileProgram(const char* code, const char* functionName) {
-    // 2. Compile kernel string
-    nvrtcProgram prog;
-    nvrtcCreateProgram(&prog, code, "k.cu", 0, nullptr, nullptr);
-    const char* opts[] = { "--gpu-architecture=compute_75" };
-    nvrtcCompileProgram(prog, 1, opts);
-
-    size_t ptxSize;
-    nvrtcGetPTXSize(prog, &ptxSize);
-    std::string ptx(ptxSize, '\0');
-    nvrtcGetPTX(prog, ptx.data());
-    nvrtcDestroyProgram(&prog);
-
-    // Keep PTX version compatible with your GPU driver
-    ptx.replace(ptx.find(".version"), ptx.find(".target") - ptx.find(".version"), ".version 7.5\n");
-
-    CUmodule module;
-    CUfunction kernel;
-    cuModuleLoadData(&module, ptx.c_str());
-    cuModuleGetFunction(&kernel, module, functionName);
-
-    return kernel;
-}
-
-auto LoadToGPU(void* ptr, size_t size) {
-    CUdeviceptr gpuData;
-    cuMemAlloc(&gpuData, size);
-    cuMemcpyHtoD(gpuData, ptr, size);
-
-    return gpuData;
-}
-
-//Runs the given function on the GPU and returns the result
-void RunGPU(float* out, size_t size, CUdeviceptr gpuData, CUfunction kernel) {
-    void* args[] = { &gpuData };
-    cuLaunchKernel(kernel, 1, 1, 1, 4, 1, 1, 0, nullptr, args, nullptr);
-    cuMemcpyDtoH(out, gpuData, size);
-}
+#include "particle_manager.hpp"
 
 int main() {
-    InitGPU();
+    std::cout << "Particle sim starting...\n";
+    
+    Renderer::Init(1600, 900, "Particle Simulation", {512.f, 512.f});
+    //DONT CHANGE FPS WILL FLICKER UNDER 500!!!😠😠😠
+    Engine::SetFrameRate(120);
 
-    CUfunction kernel = CompileProgram(kernelCode, "doubleNumbers");
+    double cameraSpeed = 400.0;
+    double cameraShiftSpeed = 1000.0;
+    float zoomSpeed = 1.f;
+    ParticleManager pm;
 
-    // 3. Copy data to GPU and run kernel
-    float numbers[4] = { 1, 2, 3, 4 };
-    auto gpuData = LoadToGPU(numbers, sizeof(numbers));
-    RunGPU(numbers, sizeof(numbers), gpuData, kernel);
+    // If it's running
+    bool running = true;
+    while (running) {
+        Engine::BeginFrame();
+        Engine::PollEvents(running);
 
-    cuMemFree(gpuData);
+        double dt = Engine::GetDeltaTime();
+
+        Renderer::BeginFrame();
+        Renderer::Clear(Color(30, 0, 70));
+
+        if (Input::MouseDown(LMB) || Input::MousePressed(RMB)) {
+            Vec2<float> mp = Input::CameraMousePosition();
+            Vec2<double> mousePos = Vec2<double>(mp.x, mp.y);
+            pm.AddParticle(mousePos.x, mousePos.y);
+        }
+
+        double realCamSpeed = (Input::KeyDown(SDL_SCANCODE_LSHIFT) ? cameraShiftSpeed : cameraSpeed) / Renderer::camera.zoom * dt;
+        if (Input::KeyDown(SDL_SCANCODE_W)) {
+            Renderer::camera.pos.y -= realCamSpeed;
+        } if (Input::KeyDown(SDL_SCANCODE_S)) {
+            Renderer::camera.pos.y += realCamSpeed;
+        } if (Input::KeyDown(SDL_SCANCODE_A)) {
+            Renderer::camera.pos.x -= realCamSpeed;
+        } if (Input::KeyDown(SDL_SCANCODE_D)) {
+            Renderer::camera.pos.x += realCamSpeed;
+        }
+        
+        if (Input::ScrolledUp()) {
+            Renderer::camera.zoom *= 1.f + (0.1f * zoomSpeed);
+        } else if (Input::ScrolledDown()) {
+            Renderer::camera.zoom /= 1.f + (0.1f * zoomSpeed);
+        }
+
+        if (Input::KeyDown(SDL_SCANCODE_DELETE))
+            pm.Clear();
+        
+        pm.Update();
+        pm.Draw();
+        
+        Renderer::DrawText(Vec2(4, 4), "FPS: " + std::to_string(Engine::GetFPS()), Colors::WHITE, true);
+        Renderer::DrawText(Vec2(4, 30), "Particle count: " + std::to_string(pm.AmountOfParticles()), Colors::WHITE, true);
+
+        Renderer::EndFrame();
+
+        Engine::EndFrame();
+    }
 }
+

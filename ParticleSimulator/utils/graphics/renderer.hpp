@@ -39,7 +39,6 @@ public:
         SDL_Init(SDL_INIT_VIDEO);
         sdl_window = CreateWindow(width, height, name);
         sdl_renderer = CreateRenderer(sdl_window);
-        SDL_SetRenderVSync(sdl_renderer, 0);
         TM::Init(sdl_renderer, "utils/textures/");
         TM::LoadTextures();
 

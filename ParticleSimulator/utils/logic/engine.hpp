@@ -57,7 +57,9 @@ public:
         auto remaining = target - Clock::now();
         if (remaining > std::chrono::milliseconds(2))
             std::this_thread::sleep_for(remaining - std::chrono::milliseconds(1));
-        while (Clock::now() <= target) {}
+        while (Clock::now() < target) {}
+
+        frameCount++;
     }
 
     // Get duration of the last frame.
@@ -80,9 +82,15 @@ public:
         targetFrameDuration = 1.0s / target;
     }
 
+    static inline int64_t GetFrameCount() {
+        return frameCount;
+    }
+
 private:
     static inline Clock::time_point last{};
     static inline Clock::time_point frameStart{};
     static inline double dt = 0.1;
     static inline Seconds targetFrameDuration{1.0 / 60.0};
+
+    static inline int64_t frameCount = 0;
 };

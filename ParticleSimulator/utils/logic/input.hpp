@@ -79,7 +79,7 @@ public:
     }
 
     static Vec2<float> CameraMousePosition() {
-        return mousePosition + Renderer::camera.pos - Renderer::camera.offset;
+        return (mousePosition - Renderer::camera.offset) / Renderer::camera.zoom + Renderer::camera.pos;
     }
 
 private:

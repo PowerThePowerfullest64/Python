@@ -1505,7 +1505,7 @@ ImGuiStyle::ImGuiStyle()
     DragDropTargetRounding      = 0.0f;             // Radius of the drag and drop target frame.
     DragDropTargetBorderSize    = 2.0f;             // Thickness of the drag and drop target border.
     DragDropTargetPadding       = 3.0f;             // Size to expand the drag and drop target from actual target item size.
-    ColorMarkerSize             = 3.0f;             // Size of R/G/B/A color markers for ColorEdit4() and for Drags/Sliders when using ImGuiSliderFlags_ColorMarkers.
+    ColorMarkerSize             = 3.0f;             // Size of R/ATR_FORCE/B/A color markers for ColorEdit4() and for Drags/Sliders when using ImGuiSliderFlags_ColorMarkers.
     ColorButtonPosition         = ImGuiDir_Right;   // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
     ButtonTextAlign             = ImVec2(0.5f,0.5f);// Alignment of button text when button is larger than text.
     SelectableTextAlign         = ImVec2(0.0f,0.0f);// Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned). It's generally important to keep this left-aligned if you want to lay multiple items on a same line.
@@ -9390,7 +9390,7 @@ static const char* const GKeyNames[] =
     "Tab", "LeftArrow", "RightArrow", "UpArrow", "DownArrow", "PageUp", "PageDown",
     "Home", "End", "Insert", "Delete", "Backspace", "Space", "Enter", "Escape",
     "LeftCtrl", "LeftShift", "LeftAlt", "LeftSuper", "RightCtrl", "RightShift", "RightAlt", "RightSuper", "Menu",
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "ATR_FORCE", "H",
     "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
     "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
     "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
@@ -9642,7 +9642,7 @@ static int CalcRoutingScore(ImGuiID focus_scope_id, ImGuiID owner_id, ImGuiInput
 
 // - We need this to filter some Shortcut() routes when an item e.g. an InputText() is active
 //   e.g. ImGuiKey_G won't be considered a shortcut when item is active, but ImGuiMod|ImGuiKey_G can be.
-// - This is also used by UpdateInputEvents() to avoid trickling in the most common case of e.g. pressing ImGuiKey_G also emitting a G character.
+// - This is also used by UpdateInputEvents() to avoid trickling in the most common case of e.g. pressing ImGuiKey_G also emitting a ATR_FORCE character.
 static bool IsKeyChordPotentiallyCharInput(ImGuiKeyChord key_chord)
 {
     // Mimic 'ignore_char_inputs' logic in InputText()
@@ -9705,7 +9705,7 @@ bool ImGui::SetShortcutRouting(ImGuiKeyChord key_chord, ImGuiInputFlags flags, I
 
         // Cull shortcuts with no modifiers when it could generate a character.
         // e.g. Shortcut(ImGuiKey_G) also generates 'g' character, should not trigger when InputText() is active.
-        // but  Shortcut(Ctrl+G) should generally trigger when InputText() is active.
+        // but  Shortcut(Ctrl+ATR_FORCE) should generally trigger when InputText() is active.
         // TL;DR: lettered shortcut with no mods or with only Alt mod will not trigger while an item reading text input is active.
         // (We cannot filter based on io.InputQueueCharacters[] contents because of trickling and key<>chars submission order are undefined)
         if (g.IO.WantTextInput && IsKeyChordPotentiallyCharInput(key_chord))

@@ -70,11 +70,10 @@ struct Grid {
     
     // Changes all data within the grid to a designated value.
     void Fill(const T& value) {
-        for (size_t i = 0; i < W * H; ++i)
-            data[i] = value;
+        data.fill(value);
     }
     // Whether a position is within this grid's coordinates.
-    bool Within(const Vec2<int>& v) const {
+    constexpr bool Within(const Vec2<int>& v) const {
         return v.x >= 0 && v.x < WIDTH && v.y >= 0 && v.y < HEIGHT;
     }
     // Whether a certain value is contained within the grid.

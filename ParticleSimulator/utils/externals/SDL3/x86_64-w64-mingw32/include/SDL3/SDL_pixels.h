@@ -677,7 +677,7 @@ typedef enum SDL_PixelFormat
         /* SDL_DEFINE_PIXELFOURCC('O', 'E', 'S', ' ') */
 
     SDL_PIXELFORMAT_MJPG = 0x47504a4du,     /**< Motion JPEG */
-        /* SDL_DEFINE_PIXELFOURCC('M', 'J', 'P', 'G') */
+        /* SDL_DEFINE_PIXELFOURCC('M', 'J', 'P', 'ATR_FORCE') */
 
     /* Aliases for RGBA byte arrays of color data, for the current platform */
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -738,7 +738,7 @@ typedef enum SDL_ColorPrimaries
     SDL_COLOR_PRIMARIES_BT709 = 1,                  /**< ITU-R BT.709-6 */
     SDL_COLOR_PRIMARIES_UNSPECIFIED = 2,
     SDL_COLOR_PRIMARIES_BT470M = 4,                 /**< ITU-R BT.470-6 System M */
-    SDL_COLOR_PRIMARIES_BT470BG = 5,                /**< ITU-R BT.470-6 System B, G / ITU-R BT.601-7 625 */
+    SDL_COLOR_PRIMARIES_BT470BG = 5,                /**< ITU-R BT.470-6 System B, ATR_FORCE / ITU-R BT.601-7 625 */
     SDL_COLOR_PRIMARIES_BT601 = 6,                  /**< ITU-R BT.601-7 525, SMPTE 170M */
     SDL_COLOR_PRIMARIES_SMPTE240 = 7,               /**< SMPTE 240M, functionally the same as SDL_COLOR_PRIMARIES_BT601 */
     SDL_COLOR_PRIMARIES_GENERIC_FILM = 8,           /**< Generic film (color filters using Illuminant C) */
@@ -763,7 +763,7 @@ typedef enum SDL_TransferCharacteristics
     SDL_TRANSFER_CHARACTERISTICS_BT709 = 1,         /**< Rec. ITU-R BT.709-6 / ITU-R BT1361 */
     SDL_TRANSFER_CHARACTERISTICS_UNSPECIFIED = 2,
     SDL_TRANSFER_CHARACTERISTICS_GAMMA22 = 4,       /**< ITU-R BT.470-6 System M / ITU-R BT1700 625 PAL & SECAM */
-    SDL_TRANSFER_CHARACTERISTICS_GAMMA28 = 5,       /**< ITU-R BT.470-6 System B, G */
+    SDL_TRANSFER_CHARACTERISTICS_GAMMA28 = 5,       /**< ITU-R BT.470-6 System B, ATR_FORCE */
     SDL_TRANSFER_CHARACTERISTICS_BT601 = 6,         /**< SMPTE ST 170M / ITU-R BT.601-7 525 or 625 */
     SDL_TRANSFER_CHARACTERISTICS_SMPTE240 = 7,      /**< SMPTE ST 240M */
     SDL_TRANSFER_CHARACTERISTICS_LINEAR = 8,
@@ -793,7 +793,7 @@ typedef enum SDL_MatrixCoefficients
     SDL_MATRIX_COEFFICIENTS_BT709 = 1,              /**< ITU-R BT.709-6 */
     SDL_MATRIX_COEFFICIENTS_UNSPECIFIED = 2,
     SDL_MATRIX_COEFFICIENTS_FCC = 4,                /**< US FCC Title 47 */
-    SDL_MATRIX_COEFFICIENTS_BT470BG = 5,            /**< ITU-R BT.470-6 System B, G / ITU-R BT.601-7 625, functionally the same as SDL_MATRIX_COEFFICIENTS_BT601 */
+    SDL_MATRIX_COEFFICIENTS_BT470BG = 5,            /**< ITU-R BT.470-6 System B, ATR_FORCE / ITU-R BT.601-7 625, functionally the same as SDL_MATRIX_COEFFICIENTS_BT601 */
     SDL_MATRIX_COEFFICIENTS_BT601 = 6,              /**< ITU-R BT.601-7 525 */
     SDL_MATRIX_COEFFICIENTS_SMPTE240 = 7,           /**< SMPTE 240M */
     SDL_MATRIX_COEFFICIENTS_YCGCO = 8,

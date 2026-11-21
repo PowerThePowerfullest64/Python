@@ -25,13 +25,21 @@ public:
 
                 dist = std::sqrt(distx*distx + disty*disty);
                 if (dist == 0.0) continue; // ABORT!!
-
+                
                 double direction = std::atan2(disty, distx);
-                double forceX = std::cos(direction) / dist;
-                double forceY = std::sin(direction) / dist;
+                double aForceX = std::cos(direction) / dist;
+                double aForceY = std::sin(direction) / dist;
+                
+                double rForceX = 0.0;
+                double rForceY = 0.0;
+                
+                if (dist <= prRadius) {
+                    rForceX = (prRadius - dist) / prRadius * -aForceX;
+                    rForceY = (prRadius - dist) / prRadius * -aForceY;
+                }
 
-                ax += forceX * G;
-                ay += forceY * G;
+                ax += aForceX * ATR_FORCE + rForceX * REP_FORCE;
+                ay += aForceY * ATR_FORCE + rForceY * REP_FORCE;
             }
 
             vx[i] += ax;
@@ -43,7 +51,7 @@ public:
 
     void Draw() const {
         for (int i = 0; i < AmountOfParticles(); i++) {
-            Renderer::DrawShape(Circle<double>(x[i], y[i], pRadius), pColor);
+            Renderer::DrawShape(Circle<double>(x[i], y[i], pvRadius), pColor);
         }
     }
 
@@ -55,8 +63,8 @@ public:
     }
 
     void AddParticle() {
-        x.push_back(Random::RangeI(0, 1600));
-        y.push_back(Random::RangeI(0, 900));
+        x.push_back(Random::RangeI32(0, 1600));
+        y.push_back(Random::RangeI32(0, 900));
         vx.push_back(0.0);
         vy.push_back(0.0);
     }
@@ -78,7 +86,9 @@ private:
     std::vector<double> vx;
     std::vector<double> vy;
 
-    static constexpr int pRadius = 4;
+    static constexpr int pvRadius = 4;
+    static constexpr int prRadius = 12;
     static constexpr Color pColor = Colors::RED;
-    static constexpr double G = 0.05;
+    static constexpr double ATR_FORCE = 0.05;
+    static constexpr double REP_FORCE = 0.75;
 };
