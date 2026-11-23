@@ -47,18 +47,18 @@ namespace Random {
 
     template<typename T, size_t size>
     requires (size > 0)
-    inline T& Choice(std::array<T, size>& a) {
+    inline T& Choice(const std::array<T, size>& a) {
         return a[RangeUI32(0, size-1)];
     }
 
     template<typename T, size_t size>
     requires (size > 0)
-    inline T& Choice(T (&a)[size]) {
+    inline T& Choice(const T (&a)[size]) {
         return a[RangeUI32(0, size-1)];
     }
 
     template<typename T>
-    inline T& Choice(std::vector<T>& v) {
+    inline T& Choice(const std::vector<T>& v) {
         assert(!v.empty() && "Cannot randomly choose an element from an empty vector.");
         return v[RangeUI32(0, v.size()-1)];
     }

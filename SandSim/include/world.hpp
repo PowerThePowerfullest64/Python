@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "utils/structures/grid.hpp"
 #include <SDL3/SDL.h>
 
@@ -15,10 +17,13 @@ public:
     void Update();
     void Render() const;
 
-    void Place(int x, int y, int radius, Material material);
+    void Place(int x, int y, int radius, MaterialId material);
 
 private:
-    Grid<Material, 256, 256> grid;
+    static constexpr int WIDTH = 256, HEIGHT = 256;
+    Grid<MaterialId, WIDTH, HEIGHT> materialIds;
+    Grid<uint8_t, WIDTH, HEIGHT> paletteIndices;
+
     SDL_Renderer* sdl_renderer;
     SDL_Texture* tex;
 };
