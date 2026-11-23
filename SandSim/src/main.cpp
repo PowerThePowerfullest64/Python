@@ -8,7 +8,7 @@
 
 int main() {
     Renderer::Init(1024, 1024, "Falling Sand Sim");
-    Engine::SetFrameRate(120);
+    Engine::SetFrameRate(0);
 
     World world(4);
 
@@ -34,6 +34,7 @@ int main() {
         world.Render();
 
         Renderer::DrawText(Vec2(4, 4), "FPS: " + std::to_string(Engine::GetFPS()), Colors::WHITE, true);
+        Renderer::DrawText(Vec2(4, 12), "Block count: " + std::to_string(world.blockCount), Colors::WHITE, true);
 
         Renderer::EndFrame();
 

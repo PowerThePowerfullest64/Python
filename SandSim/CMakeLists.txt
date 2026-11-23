@@ -6,6 +6,7 @@ add_subdirectory(utils)
 file(GLOB SOURCES "src/*.cpp")
 add_executable(UnknownGame ${SOURCES})
 
+target_compile_options(UnknownGame PRIVATE -O3)
 target_include_directories(UnknownGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(UnknownGame PRIVATE utils)
 target_link_options(UnknownGame PRIVATE "-Wl,--stack,16777216") # MAKE STACK 16 MB

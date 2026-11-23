@@ -71,6 +71,9 @@ public:
         std::cout << "Deinitialized Renderer!\n";
     }
 
+    static SDL_Renderer* GetSDLRenderer() { return sdl_renderer; }
+    static SDL_Window* GetSDLWindow() { return sdl_window; }
+
     template<typename T>
     static void DrawText(const Vec2<T>& position, const std::string& text, const Color& color = Colors::WHITE, bool cameraRelative = false) {
         Vec2<T> usedPosition = cameraRelative ? position : ToCamera(position);

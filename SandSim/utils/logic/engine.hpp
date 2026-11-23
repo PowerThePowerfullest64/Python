@@ -55,11 +55,9 @@ public:
     static inline void EndFrame() {
         auto target = frameStart + std::chrono::duration_cast<Clock::duration>(targetFrameDuration);
         auto remaining = target - Clock::now();
-        if (remaining > std::chrono::milliseconds(2))
-            std::this_thread::sleep_for(remaining - std::chrono::milliseconds(1));
-        while (Clock::now() < target) {}
-
-        ++frameCount;
+        if (remaining > Clock::duration::zero())
+            SDL_DelayPrecise(std::chrono::duration_cast<std::chrono::nanoseconds>(remaining).count());
+        frameCount++;
     }
 
     // Get duration of the last frame.
@@ -82,13 +80,15 @@ public:
         targetFrameDuration = 1.0s / target;
     }
 
-    static inline size_t GetFrameCount() { return frameCount; }
+    static inline int64_t GetFrameCount() {
+        return frameCount;
+    }
 
 private:
     static inline Clock::time_point last{};
     static inline Clock::time_point frameStart{};
     static inline double dt = 0.1;
     static inline Seconds targetFrameDuration{1.0 / 60.0};
-    
-    static inline size_t frameCount = 0;
+
+    static inline int64_t frameCount = 0;
 };

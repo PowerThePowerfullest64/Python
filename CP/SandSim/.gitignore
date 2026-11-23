@@ -1,7 +1,0 @@
-
-.vscode
-
-# imgui window info
-*.ini
-
-cmake_build

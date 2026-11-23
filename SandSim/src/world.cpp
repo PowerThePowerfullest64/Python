@@ -9,6 +9,11 @@
 
 World::World(int blockSize) {
     BLOCK_SIZE = blockSize;
+
+    sdl_renderer = Renderer::GetSDLRenderer();
+    tex = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA32,
+        SDL_TEXTUREACCESS_STREAMING, 256, 256);
+    SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 }
 
 void World::Update() {
@@ -46,36 +51,40 @@ void World::Update() {
 }
 
 void World::Render() const {
+    void* pixels;
+    int pitch;
+    SDL_LockTexture(tex, nullptr, &pixels, &pitch);
+
     for (int y = 0; y < grid.HEIGHT; y++) {
+        uint32_t* row = (uint32_t*)((uint8_t*)pixels + y * pitch);
         for (int x = 0; x < grid.WIDTH; x++) {
-            if (grid(x, y) == Material::AIR)
-                continue;
-
-            const Rectangle<int> rect(
-                x * BLOCK_SIZE,
-                y * BLOCK_SIZE,
-                BLOCK_SIZE,
-                BLOCK_SIZE
-            );
-
-            Renderer::DrawShape(rect, Colors::YELLOW, true);
+            row[x] = grid(x, y) == Material::AIR ? 0xFFFA0000 : 0xFF00FFFF;
         }
     }
+    SDL_UnlockTexture(tex);
+
+    SDL_FRect dst = {0, 0, static_cast<float>(grid.WIDTH * BLOCK_SIZE), static_cast<float>(grid.HEIGHT * BLOCK_SIZE)};
+    SDL_RenderTexture(sdl_renderer, tex, nullptr, &dst);
 }
 
 void World::Place(int cx, int cy, int radius, Material material) {
-    const int r2 = radius * radius;
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            Vec2<int> pos = Vec2(cx+x, cy+y);
+            if (!grid.Within(pos))
+                continue;
 
-    for (int dy = -radius; dy <= radius; dy++) {
-        for (int dx = -radius; dx <= radius; dx++) {
-            if (dx * dx + dy * dy <= r2) {
-                const Vec2<int> pos(cx + dx, cy + dy);
+            Material mat = grid(pos);
+            if (mat == material)
+                continue;
 
-                if (!grid.Within(pos))
-                    return;
+            if (material == Material::AIR)
+                blockCount--;
+            else
+                blockCount++;
 
-                grid(pos) = material;
-            }
+
+            grid(pos) = material;
         }
     }
 }
