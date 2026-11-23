@@ -11,7 +11,7 @@ int main() {
     Engine::SetFrameRate(120);
 
     bool paused = false;
-    World world(4);
+    World world;
     world.Place(128, 128, 8, MaterialId::SAND);
 
     bool running = true;

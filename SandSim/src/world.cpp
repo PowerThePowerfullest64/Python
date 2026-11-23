@@ -7,20 +7,22 @@
 #include "utils/math/random.hpp"
 #include "utils/logic/engine.hpp"
 
-World::World(int blockSize) {
-    BLOCK_SIZE = blockSize;
-
+World::World() {
     materialIds.Fill(MaterialId::AIR);
     paletteIndices.Fill(0);
 
     sdl_renderer = Renderer::GetSDLRenderer();
     tex = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA32,
-        SDL_TEXTUREACCESS_STREAMING, 256, 256);
+        SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
     SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 }
 
 void World::Update() {
     const auto frameCount = Engine::GetFrameCount();
+
+    // Seeded rng every frame.
+    uint32_t rng = static_cast<uint32_t>(frameCount * 747796405u + 2891336453u);
+
     for (int y = HEIGHT-1; y >= 0; y--) {
         const bool scanLeft = ((y + frameCount) & 1) == 0;
 
@@ -32,43 +34,24 @@ void World::Update() {
                 continue;
 
             const Vec2<int> d = {x, y+1};
-            const Vec2<int> dr = {x+1, y+1};
-            const Vec2<int> dl = {x-1, y+1};
-
-            const bool leftFirst = Random::RangeI32(0, 1) == 0;
-            const Vec2<int> firstDiag = leftFirst ? dl : dr;
-            const Vec2<int> secondDiag = leftFirst ? dr : dl;
-
             if (materialIds.Within(d) && materialIds(d) == MaterialId::AIR) {
-                // Swap materials
-                auto tmpId = materialIds(x, y);
-                materialIds(x, y) = materialIds(d);
-                materialIds(d) = tmpId;
+                Swap(Vec2(x, y), d);
+            } else {
+                rng ^= rng << 13;
+                rng ^= rng >> 17;
+                rng ^= rng << 5;
+                const bool leftFirst = (rng & 1) == 0;
 
-                // Swap palettes
-                auto tmpPaletteIndex = paletteIndices(x, y);
-                paletteIndices(x, y) = paletteIndices(d);
-                paletteIndices(d) = tmpPaletteIndex;
-            } else if (materialIds.Within(firstDiag) && materialIds(firstDiag) == MaterialId::AIR) {
-                // Swap materials
-                auto tmpId = materialIds(x, y);
-                materialIds(x, y) = materialIds(firstDiag);
-                materialIds(firstDiag) = tmpId;
+                const Vec2<int> dr = {x+1, y+1};
+                const Vec2<int> dl = {x-1, y+1};
+                const Vec2<int> firstDiag = leftFirst ? dl : dr;
+                const Vec2<int> secondDiag = leftFirst ? dr : dl;
 
-                // Swap palettes
-                auto tmpPaletteIndex = paletteIndices(x, y);
-                paletteIndices(x, y) = paletteIndices(firstDiag);
-                paletteIndices(firstDiag) = tmpPaletteIndex;
-            } else if (materialIds.Within(secondDiag) && materialIds(secondDiag) == MaterialId::AIR) {
-                // Swap materials
-                auto tmpId = materialIds(x, y);
-                materialIds(x, y) = materialIds(secondDiag);
-                materialIds(secondDiag) = tmpId;
-
-                // Swap palettes
-                auto tmpPaletteIndex = paletteIndices(x, y);
-                paletteIndices(x, y) = paletteIndices(secondDiag);
-                paletteIndices(secondDiag) = tmpPaletteIndex;
+                if (materialIds.Within(firstDiag) && materialIds(firstDiag) == MaterialId::AIR) {
+                    Swap(Vec2(x, y), firstDiag);
+                } else if (materialIds.Within(secondDiag) && materialIds(secondDiag) == MaterialId::AIR) {
+                    Swap(Vec2(x, y), secondDiag);
+                }
             }
         }
     }
