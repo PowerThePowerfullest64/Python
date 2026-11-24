@@ -10,6 +10,7 @@ int main() {
     Renderer::Init(1024, 1024, "Falling Sand Sim");
     Engine::SetFrameRate(120);
 
+    MaterialId materialIndex = MaterialId::SAND;
     bool paused = false;
     World world;
     world.Place(128, 128, 8, MaterialId::SAND);
@@ -23,9 +24,21 @@ int main() {
             const Vec2<float> mousePos = Input::MousePosition();
             const Vec2<int> cellPos = Vec2<int>(mousePos / world.BLOCK_SIZE);
 
-            world.Place(cellPos.x, cellPos.y, 8, (Input::MouseDown(LMB) ? MaterialId::SAND : MaterialId::AIR));
+            world.Place(cellPos.x, cellPos.y, 8, (Input::MouseDown(LMB) ? materialIndex: MaterialId::AIR));
         }
 
+        if (Input::KeyPressed(SDL_SCANCODE_1))
+            materialIndex = MaterialId::SAND;
+        if (Input::KeyPressed(SDL_SCANCODE_2))
+            materialIndex = MaterialId::WATER;
+        if (Input::KeyPressed(SDL_SCANCODE_3))
+            materialIndex = MaterialId::STEEL;
+        if (Input::KeyPressed(SDL_SCANCODE_4))
+            materialIndex = MaterialId::WOOD;
+        if (Input::KeyPressed(SDL_SCANCODE_5))
+            materialIndex = MaterialId::SMOKE;
+        if (Input::KeyPressed(SDL_SCANCODE_6))
+            materialIndex = MaterialId::STEAM;
         if (Input::KeyPressed(SDL_SCANCODE_SPACE))
             paused = !paused;
 
@@ -33,7 +46,7 @@ int main() {
             world.Update();
 
         Renderer::BeginFrame();
-        Renderer::Clear(Colors::BLUE);
+        Renderer::Clear({20, 127, 250});
 
         world.Render();
 
