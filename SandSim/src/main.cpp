@@ -27,8 +27,11 @@ int main() {
             const Vec2<int> cellPos = Vec2<int>(mousePos / world.BLOCK_SIZE);
 
             bool force = Input::KeyDown(SDL_SCANCODE_LSHIFT);
-
-            world.Place(cellPos.x, cellPos.y, 8, (Input::MouseDown(LMB) ? materialIndex: MaterialId::AIR), force);
+            if (Input::MouseDown(LMB)) {
+                world.Place(cellPos.x, cellPos.y, 8, materialIndex, force);
+            } else {
+                world.Place(cellPos.x, cellPos.y, 8, MaterialId::AIR, true);
+            }
         }
 
         if (Input::KeyPressed(SDL_SCANCODE_1))
@@ -40,10 +43,8 @@ int main() {
         if (Input::KeyPressed(SDL_SCANCODE_4))
             materialIndex = MaterialId::WOOD;
         if (Input::KeyPressed(SDL_SCANCODE_5))
-            materialIndex = MaterialId::SMOKE;
-        if (Input::KeyPressed(SDL_SCANCODE_6))
             materialIndex = MaterialId::STEAM;
-        if (Input::KeyPressed(SDL_SCANCODE_7))
+        if (Input::KeyPressed(SDL_SCANCODE_6))
             materialIndex = MaterialId::FIRE;
         if (Input::KeyPressed(SDL_SCANCODE_DELETE))
             world.Clear();
