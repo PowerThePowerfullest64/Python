@@ -1,48 +1,65 @@
-import random
-from turtle import *
+def plus():
+    print("Du har valgt plus!")
+    a = float(input("Indtast første tal: "))
+    b = float(input("Indtast andet tal: "))
+    print(f"Addition: {a} + {b} = {a+b}")
 
-def draw_point(t: Turtle, x: int, y: int):
-    t.penup()
-    t.goto((x, y))
-    t.pendown()
-    t.circle(1)
-    t.penup()
+def minus():
+    print("Du har valgt minus!")
+    a = float(input("Indtast første tal: "))
+    b = float(input("Indtast andet tal: "))
+    print(f"Subtraktion: {a} - {b} = {a-b}")
 
-t: Turtle = Turtle()
-t.speed(0)
+def gange():
+    print("Du har valgt gange!")
+    a = float(input("Indtast første tal: "))
+    b = float(input("Indtast andet tal: "))
+    print(f"Subtraktion: {a} * {b} = {a*b}")
 
-xCoords = []
-yCoords = []
+def division():
+    print("Du har valgt gange!")
+    a = float(input("Indtast første tal: "))
+    b = float(input("Indtast andet tal: "))
+    print(f"Subtraktion: {a} / {b} = {a/b}")
+
+def menu():
+    print() #Printer en tom linie
+    print("-----")
+    print("Menu:")
+    print("-----")
+
+    print("1: Addition (+)")
+    print("2: Subtraktion (-)")
+    print("3: Multiplikation (*)")
+    print("4: Division (/)")
+    print("")
+    print("9: afslut")
+    valg = input("Indtast dit valg: ")
+    print()
+
+    if valg == "1":
+        plus()
+        menu()
+    elif valg == "2":
+        minus()
+        menu()
+    elif valg == "3":
+        gange()
+        menu()
+    elif valg == "4":
+        division()
+        menu()
+    elif valg == "9":
+        print("Afslutter! ses!")
+        #Her kalder vi ikke menu, så programmet slutter.
+    else:
+        print("     Forkert valg... prøv igen")
+        menu()
 
 
-# 3 random points
-for i in range(3):
-    xCoords.append(random.randint(-500, 500))
-    yCoords.append(random.randint(-500, 500))
 
-    draw_point(t, xCoords[i], yCoords[i])
-
-t.penup()
-
-rand_index = random.randint(0, 2)
-start_x = xCoords[rand_index]
-start_y = yCoords[rand_index]
-
-i = 0
-while (i < 1000000):
-    i += 1
-    dest_index = random.randint(0, 2)
-    dest_x = xCoords[dest_index]
-    dest_y = yCoords[dest_index]
-
-    start_x = (start_x + dest_x) / 2
-    start_y = (start_y + dest_y) / 2
-
-    draw_point(t, start_x, start_y)
-
-
-
-
-
-
-start_x = 10
+#Alt ovenstående kode er defineret i funktioner, så det her er faktisk det eneste der bliver kørt:
+print("------------------------------------")
+print("   Velkommen til regneprogrammet!")
+print("------------------------------------")
+menu()
