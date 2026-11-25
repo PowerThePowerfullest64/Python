@@ -39,6 +39,8 @@ int main() {
             materialIndex = MaterialId::SMOKE;
         if (Input::KeyPressed(SDL_SCANCODE_6))
             materialIndex = MaterialId::STEAM;
+        if (Input::KeyPressed(SDL_SCANCODE_DELETE))
+            world.Clear();
         if (Input::KeyPressed(SDL_SCANCODE_SPACE))
             paused = !paused;
 

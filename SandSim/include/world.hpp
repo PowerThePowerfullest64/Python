@@ -20,6 +20,7 @@ public:
     void Render() const;
 
     void Place(int x, int y, int radius, MaterialId material);
+    void Clear();
 
 private:
     // Maxiumum amount of blocks a liquid can move horizontally in one update.

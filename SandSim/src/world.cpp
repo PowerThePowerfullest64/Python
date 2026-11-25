@@ -205,3 +205,11 @@ void World::UpdateGas(const Vec2<int>& position, const MaterialDef& matDef, uint
 
     TryHorizontalSpread(position, matDef, leftFirst);
 }
+
+void World::Clear() {
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            Place(x, y, 0, MaterialId::AIR);
+        }
+    }
+}
