@@ -38,14 +38,14 @@ public:
                     rForceY = (prRadius - dist) / prRadius * -aForceY;
                 }
 
-                ax += aForceX * ATR_FORCE + rForceX * REP_FORCE;
-                ay += aForceY * ATR_FORCE + rForceY * REP_FORCE;
+                ax += aForceX * ATR_FORCE;
+                ay += aForceY * ATR_FORCE;
             }
 
             vx[i] += ax;
             vy[i] += ay;
-            x[i] += vx[i];
-            y[i] += vy[i];
+            x[i] += static_cast<int>(vx[i]);
+            y[i] += static_cast<int>(vy[i]);
         }
     }
 
