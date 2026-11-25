@@ -19,7 +19,7 @@ public:
     void Update();
     void Render() const;
 
-    void Place(int x, int y, int radius, MaterialId material);
+    void Place(int x, int y, int radius, MaterialId material, bool force=true);
     void Clear();
 
 private:
@@ -91,4 +91,6 @@ private:
     void UpdateLiquid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
     void UpdateSolid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
     void UpdateGas(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
+
+    bool TryReact(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
 };

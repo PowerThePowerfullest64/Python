@@ -1,14 +1,16 @@
 #include <iostream>
 #include <string>
+#include <format>
 
 #include "utils/graphics/renderer.hpp"
 #include "utils/logic/engine.hpp"
 
 #include "world.hpp"
+#include "material.hpp"
 
 int main() {
     Renderer::Init(1024, 1024, "Falling Sand Sim");
-    Engine::SetFrameRate(100000);
+    Engine::SetFrameRate(120);
 
     MaterialId materialIndex = MaterialId::SAND;
     bool paused = false;
@@ -24,7 +26,9 @@ int main() {
             const Vec2<float> mousePos = Input::MousePosition();
             const Vec2<int> cellPos = Vec2<int>(mousePos / world.BLOCK_SIZE);
 
-            world.Place(cellPos.x, cellPos.y, 8, (Input::MouseDown(LMB) ? materialIndex: MaterialId::AIR));
+            bool force = Input::KeyDown(SDL_SCANCODE_LSHIFT);
+
+            world.Place(cellPos.x, cellPos.y, 8, (Input::MouseDown(LMB) ? materialIndex: MaterialId::AIR), force);
         }
 
         if (Input::KeyPressed(SDL_SCANCODE_1))
@@ -39,6 +43,8 @@ int main() {
             materialIndex = MaterialId::SMOKE;
         if (Input::KeyPressed(SDL_SCANCODE_6))
             materialIndex = MaterialId::STEAM;
+        if (Input::KeyPressed(SDL_SCANCODE_7))
+            materialIndex = MaterialId::FIRE;
         if (Input::KeyPressed(SDL_SCANCODE_DELETE))
             world.Clear();
         if (Input::KeyPressed(SDL_SCANCODE_SPACE))
@@ -52,9 +58,11 @@ int main() {
 
         world.Render();
 
+        // Text rendering.
         Renderer::DrawText(Vec2(4, 4), "FPS: " + std::to_string(Engine::GetFPS()), Colors::WHITE, true);
         Renderer::DrawText(Vec2(4, 16), "Block count: " + std::to_string(world.blockCount), Colors::WHITE, true);
-        if (paused) { Renderer::DrawText(Vec2(4, 28), "Simulation paused", Colors::WHITE, true); }
+        Renderer::DrawText(Vec2(4, 28), std::format("Material: {}", GetMaterialDef(materialIndex).name), Colors::WHITE, true);
+        if (paused) { Renderer::DrawText(Vec2(4, 40), "Simulation paused", Colors::WHITE, true); }
 
         Renderer::EndFrame();
 
