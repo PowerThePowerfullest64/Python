@@ -17,13 +17,6 @@
 # Debugger Files
 *.pdb
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-
 # Fortran module files
 *.mod
 *.smod
@@ -48,9 +41,9 @@ cmake_build/
 # CMake generated files
 CMakeFiles/
 CMakeCache.txt
-cmake_install.cmake
+#cmake_install.cmake
 #Makefile
-install_manifest.txt
+#install_manifest.txt
 compile_commands.json
 
 # Temporary files
