@@ -1,0 +1,94 @@
+#pragma once
+
+#include <chrono>
+#include <thread>
+#include <cmath>
+
+#include <SDL3/SDL.h>
+
+#include "utils/logic/input.hpp"
+
+using namespace std::chrono_literals;
+using Clock = std::chrono::steady_clock;
+using Seconds = std::chrono::duration<double>;
+
+class Engine {
+public:
+    // Updates input and events.
+    static inline void PollEvents(bool& running_state) {
+        float scroll = 0.f;
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event)) {
+            // Give events to ImGui also!
+            ImGui_ImplSDL3_ProcessEvent(&event);
+
+            switch (event.type)
+            {
+            case SDL_EVENT_QUIT:
+                running_state = false;
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                if (event.key.scancode == SDL_SCANCODE_ESCAPE)
+                    running_state = false;
+                break;
+            case SDL_EVENT_MOUSE_WHEEL:
+                scroll = event.wheel.y;
+                break;
+            default:
+                break;
+            }
+        }
+
+        Input::Update(scroll);
+    }
+
+    // Should be at start of game loop. Calculates delta time as well as other frame information.
+    static inline void BeginFrame() {
+        frameStart = Clock::now();
+        if (last != Clock::time_point{})
+            dt = Seconds(frameStart - last).count();
+        last = frameStart;
+    }
+
+    // Should be at end of game loop. Calculates and waits the necessary amount of time to keep the target frame rate.
+    static inline void EndFrame() {
+        auto target = frameStart + std::chrono::duration_cast<Clock::duration>(targetFrameDuration);
+        auto remaining = target - Clock::now();
+        if (remaining > Clock::duration::zero())
+            SDL_DelayPrecise(std::chrono::duration_cast<std::chrono::nanoseconds>(remaining).count());
+        frameCount++;
+    }
+
+    // Get duration of the last frame.
+    static inline double GetDeltaTime() {
+        return dt;
+    }
+
+    // Get the frame rate of the window.
+    static inline int GetFPS() {
+        return std::lround(1.0 / dt);
+    }
+
+    // Sets the framerate to a specified value. Setting it to 0 uncaps the framerate.
+    static inline void SetFrameRate(int target) {
+        if (target <= 0) {
+            targetFrameDuration = 0s;
+            return;
+        }
+
+        targetFrameDuration = 1.0s / target;
+    }
+
+    static inline int64_t GetFrameCount() {
+        return frameCount;
+    }
+
+private:
+    static inline Clock::time_point last{};
+    static inline Clock::time_point frameStart{};
+    static inline double dt = 0.1;
+    static inline Seconds targetFrameDuration{1.0 / 60.0};
+
+    static inline int64_t frameCount = 0;
+};

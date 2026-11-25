@@ -1,0 +1,4 @@
+extern "C" __global__ void doubleNums(float* numbers) {
+    int i = threadIdx.x;
+    numbers[i] *= 2.0f;
+}

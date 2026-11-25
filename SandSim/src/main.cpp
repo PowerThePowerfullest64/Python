@@ -8,7 +8,7 @@
 
 int main() {
     Renderer::Init(1024, 1024, "Falling Sand Sim");
-    Engine::SetFrameRate(120);
+    Engine::SetFrameRate(100000);
 
     MaterialId materialIndex = MaterialId::SAND;
     bool paused = false;
