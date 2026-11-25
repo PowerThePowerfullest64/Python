@@ -33,9 +33,9 @@ public:
                 double rForceX = 0.0;
                 double rForceY = 0.0;
                 
-                if (dist <= prRadius) {
-                    rForceX = (prRadius - dist) / prRadius * -aForceX;
-                    rForceY = (prRadius - dist) / prRadius * -aForceY;
+                if (dist >= pRadius) {
+                rForceX = (pRadius - dist) / pRadius * -aForceX;
+                rForceY = (pRadius - dist) / pRadius * -aForceY;
                 }
 
                 ax += aForceX * ATR_FORCE;
@@ -44,6 +44,12 @@ public:
 
             vx[i] += ax;
             vy[i] += ay;
+
+            if (abs(vx[i]) > vLimit)
+                vx[i] = vLimit * (vx[i]/vx[i]);
+            if (abs(vy[i]) > vLimit)
+                vy[i] = vLimit * (vy[i]/vy[i]);
+
             x[i] += static_cast<int>(vx[i]);
             y[i] += static_cast<int>(vy[i]);
         }
@@ -51,7 +57,7 @@ public:
 
     void Draw() const {
         for (int i = 0; i < AmountOfParticles(); i++) {
-            Renderer::DrawShape(Circle<double>(x[i], y[i], pvRadius), pColor);
+            Renderer::DrawShape(Circle<double>(x[i], y[i], pRadius), pColor);
         }
     }
 
@@ -86,9 +92,8 @@ private:
     std::vector<double> vx;
     std::vector<double> vy;
 
-    static constexpr int pvRadius = 4;
-    static constexpr int prRadius = 12;
+    static constexpr int pRadius = 4;
     static constexpr Color pColor = Colors::RED;
     static constexpr double ATR_FORCE = 0.05;
-    static constexpr double REP_FORCE = 0.75;
+    static constexpr double vLimit = 5.0;
 };
