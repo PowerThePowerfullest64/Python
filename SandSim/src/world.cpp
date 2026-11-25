@@ -1,6 +1,7 @@
 #include "world.hpp"
 
 #include <iostream>
+#include <array>
 
 #include "utils/graphics/renderer.hpp"
 #include "utils/math/vec2.hpp"
@@ -10,6 +11,7 @@
 World::World() {
     materialIds.Fill(MaterialId::AIR);
     paletteIndices.Fill(0);
+    lifetimes.Fill(-1);
 
     sdl_renderer = Renderer::GetSDLRenderer();
     tex = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA32,
@@ -19,9 +21,9 @@ World::World() {
 
 void World::Update() {
     const auto frameCount = Engine::GetFrameCount();
-
     // Seeded rng every frame.
     uint32_t rng = static_cast<uint32_t>(frameCount * 747796405u + 2891336453u);
+    const uint8_t tick = (frameCount & 1) + 1;
 
     for (int y = HEIGHT-1; y >= 0; y--) {
         const bool scanLeft = ((y + frameCount) & 1) == 0;
@@ -29,30 +31,23 @@ void World::Update() {
         for (int i = 0; i < WIDTH; i++) {
             int x = scanLeft ? i : WIDTH - 1 - i;
 
-            const MaterialId type = materialIds(x, y);
-            if (type == MaterialId::AIR)
-                continue;
+            const MaterialDef matDef = GetMaterialDef(materialIds(x, y));
+            if (matDef.state == MaterialState::LIQUID)
+                UpdateLiquid(Vec2(x, y), matDef, rng);
+            else if (matDef.state == MaterialState::SOLID)
+                UpdateSolid(Vec2(x, y), matDef, rng);
+        }
+    }
 
-            const Vec2<int> d = {x, y+1};
-            if (materialIds.Within(d) && materialIds(d) == MaterialId::AIR) {
-                Swap(Vec2(x, y), d);
-            } else {
-                rng ^= rng << 13;
-                rng ^= rng >> 17;
-                rng ^= rng << 5;
-                const bool leftFirst = (rng & 1) == 0;
+    for (int y = 0; y < HEIGHT; y++) {
+        const bool scanLeft = ((y + frameCount) & 1) == 0;
 
-                const Vec2<int> dr = {x+1, y+1};
-                const Vec2<int> dl = {x-1, y+1};
-                const Vec2<int> firstDiag = leftFirst ? dl : dr;
-                const Vec2<int> secondDiag = leftFirst ? dr : dl;
+        for (int i = 0; i < WIDTH; i++) {
+            int x = scanLeft ? i : WIDTH - 1 - i;
 
-                if (materialIds.Within(firstDiag) && materialIds(firstDiag) == MaterialId::AIR) {
-                    Swap(Vec2(x, y), firstDiag);
-                } else if (materialIds.Within(secondDiag) && materialIds(secondDiag) == MaterialId::AIR) {
-                    Swap(Vec2(x, y), secondDiag);
-                }
-            }
+            const MaterialDef matDef = GetMaterialDef(materialIds(x, y));
+            if (matDef.state == MaterialState::GAS)
+                UpdateGas(Vec2(x, y), matDef, rng);
         }
     }
 }
@@ -89,13 +84,124 @@ void World::Place(int cx, int cy, int radius, MaterialId material) {
 
             if (material == MaterialId::AIR)
                 blockCount--;
-            else
+            else if (mat == MaterialId::AIR)
                 blockCount++;
 
             materialIds(pos) = material;
             // Choose random color for material.
             const MaterialDef& matDef = GetMaterialDef(material);
             paletteIndices(pos) = Random::RangeUI32(0, matDef.paletteSize-1);
+            lifetimes(pos) = Random::RangeUI32(matDef.lifetime/4, matDef.lifetime);
         }
     }
+}
+
+void World::UpdateLiquid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng) {
+    if (matDef.lifetime > 0) {
+        lifetimes(position)--;
+        if (lifetimes(position) == 0) {
+            Place(position.x, position.y, 0, matDef.product);
+            return;
+        }
+    }
+
+    Vec2<int> d = {position.x, position.y+1};
+
+    if (CanMove(matDef, d)) {
+        Swap(position, d);
+    } else {
+        rng ^= rng << 13;
+        rng ^= rng >> 17;
+        rng ^= rng << 5;
+        const bool leftFirst = (rng & 1) == 0;
+
+        const Vec2<int> dr = {position.x+1, position.y+1};
+        const Vec2<int> dl = {position.x-1, position.y+1};
+
+        const Vec2<int> firstDiagonal = leftFirst ? dl : dr;
+        const Vec2<int> secondDiagonal = leftFirst ? dr : dl;
+
+        if (CanMove(matDef, firstDiagonal))
+            Swap(position, firstDiagonal);
+        else if (CanMove(matDef, secondDiagonal))
+            Swap(position, secondDiagonal);
+        else {
+            TryHorizontalSpread(position, matDef, leftFirst);
+        }
+    }
+}
+
+void World::UpdateSolid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng) {
+    if (matDef.lifetime > 0) {
+        lifetimes(position)--;
+        if (lifetimes(position) == 0) {
+            Place(position.x, position.y, 0, matDef.product);
+            return;
+        }
+    }
+
+    Vec2<int> d = {position.x, position.y+1};
+
+    if (CanMove(matDef, d)) {
+        Swap(position, d);
+    } else {
+        rng ^= rng << 13;
+        rng ^= rng >> 17;
+        rng ^= rng << 5;
+        const bool leftFirst = (rng & 1) == 0;
+
+        Vec2<int> dr = {position.x+1, position.y+1};
+        Vec2<int> dl = {position.x-1, position.y+1};
+
+        Vec2<int> firstDiagonal = leftFirst ? dl : dr;
+        Vec2<int> secondDiagonal = leftFirst ? dr : dl;
+
+        if (CanMove(matDef, firstDiagonal))
+            Swap(position, firstDiagonal);
+        else if (CanMove(matDef, secondDiagonal))
+            Swap(position, secondDiagonal);
+    }
+}
+
+void World::UpdateGas(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng) {
+    if (matDef.lifetime > 0) {
+        lifetimes(position)--;
+        if (lifetimes(position) == 0) {
+            Place(position.x, position.y, 0, matDef.product);
+            return;
+        }
+    }
+
+    rng ^= rng << 13;
+    rng ^= rng >> 17;
+    rng ^= rng << 5;
+    
+    const bool leftFirst = (rng & 1) == 0;
+    const uint32_t roll = (rng >> 1) % 100;
+    
+    const Vec2<int> u = {position.x, position.y-1};
+    const Vec2<int> ur = {position.x+1, position.y-1};
+    const Vec2<int> ul = {position.x-1, position.y-1};
+
+    const Vec2<int> firstDiag = leftFirst ? ul : ur;
+    const Vec2<int> secondDiag = leftFirst ? ur : ul;
+
+    if (roll < 15) {
+        // If it spread horizontally then we are done.
+        if (TryHorizontalSpread(position, matDef, leftFirst))
+            return;
+    }
+
+    std::array<Vec2<int>, 3> moves = roll < 60
+        ? std::array<Vec2<int>, 3>{u, firstDiag, secondDiag}
+        : std::array<Vec2<int>, 3>{firstDiag, secondDiag, u};
+    
+    for (const auto& target : moves) {
+        if (CanMove(matDef, target)) {
+            Swap(position, target);
+            return;
+        }
+    }
+
+    TryHorizontalSpread(position, matDef, leftFirst);
 }
