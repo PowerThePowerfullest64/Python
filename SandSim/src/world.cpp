@@ -36,6 +36,10 @@ void World::Update() {
                 UpdateLiquid(Vec2(x, y), matDef, rng);
             else if (matDef.state == MaterialState::SOLID)
                 UpdateSolid(Vec2(x, y), matDef, rng);
+            else if (matDef.state == MaterialState::STATIC) {
+                if (matDef.lifetime > 0 || matDef.reactionsSize > 0) // oOnly update a static if it has active properties.
+                    UpdateStatic(Vec2(x, y), matDef, rng);
+            }
         }
     }
 
@@ -220,6 +224,18 @@ void World::UpdateGas(const Vec2<int>& position, const MaterialDef& matDef, uint
     TryHorizontalSpread(position, matDef, leftFirst);
 }
 
+void World::UpdateStatic(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng) {
+    if (matDef.lifetime > 0) {
+        lifetimes(position)--;
+        if (lifetimes(position) == 0) {
+            Place(position.x, position.y, 0, matDef.product);
+            return;
+        }
+    }
+
+    TryReact(position, matDef, rng);
+}
+
 bool World::TryReact(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng) {
     if (matDef.reactionsSize == 0)
         return false;
@@ -238,14 +254,14 @@ bool World::TryReact(const Vec2<int>& position, const MaterialDef& matDef, uint3
         MaterialId nId = materialIds(nPos);
         for (int i = 0; i < matDef.reactionsSize; i++) {
             const auto& rule = matDef.reactions[i];
-            if (rule.neighbor != nId)
+            if (rule.neighbor != nId && (rule.neighbor != MaterialId::ANY || nId == MaterialId::AIR || matId == nId))
                 continue;
             
             rng ^= rng << 13;
             rng ^= rng >> 17;
             rng ^= rng << 5;
 
-            if ((rng % 100) < rule.chance) {
+            if ((rng % 1000) < rule.chance) {
                 if (rule.otherBecomes != nId) {
                     Place(nPos.x, nPos.y, 0, rule.otherBecomes);
                 }

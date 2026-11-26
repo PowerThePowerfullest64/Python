@@ -46,6 +46,10 @@ int main() {
             materialIndex = MaterialId::STEAM;
         if (Input::KeyPressed(SDL_SCANCODE_6))
             materialIndex = MaterialId::FIRE;
+        if (Input::KeyPressed(SDL_SCANCODE_7))
+            materialIndex = MaterialId::STOPPIUM;
+        if (Input::KeyPressed(SDL_SCANCODE_8))
+            materialIndex = MaterialId::VOIDIUM;
         if (Input::KeyPressed(SDL_SCANCODE_DELETE))
             world.Clear();
         if (Input::KeyPressed(SDL_SCANCODE_SPACE))

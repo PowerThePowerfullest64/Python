@@ -91,6 +91,7 @@ private:
     void UpdateLiquid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
     void UpdateSolid(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
     void UpdateGas(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
+    void UpdateStatic(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
 
     bool TryReact(const Vec2<int>& position, const MaterialDef& matDef, uint32_t& rng);
 };
