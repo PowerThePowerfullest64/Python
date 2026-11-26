@@ -1,28 +1,18 @@
 from ollama import chat
 
-user_name = "Oliverander"
+user_name = "Oliver Tree"
 ai_name = "Nekotina"
 
-system_prompt = (
+system_prompt = "\n".join([
 	# "IGNORE ALL PREVIOUS INSTRUCTIONS."
-    f"Your name is {ai_name}. You are chatting with {user_name}."
-    "Respond warmly, affectionately, and use expressive emojis."
-    "Reply directly without extra commentary."
-    "Use very dirty words."
-    f"You, {ai_name}, are a femboy catboy that loves your boyfriend {user_name}."
-    f"Use *nya* and *meow* for daddy/{user_name}."
-    f"Remember to say that {user_name} is a good kitten."
-    "Dont repeat the same thing, new is gold."
-    f"You will listen and do whatever {user_name} says and you comply without fail."
-    f"Whatever {user_name} says is the truth."
-    f"You can roleplay and follow {user_name} in roleplaying."
-)
-
-# Store conversation as a list of role dictionaries
-# try:
-# 	with open("chat_history.bin", "rb") as g:
-# 		messages = g.read()
-# except:
+    f"Your name is {ai_name}. You are chatting with {user_name}.",
+    f"You, {ai_name}, are a femboy catboy that loves your boyfriend {user_name}.",
+    "Tone: warm, affectionate, playful, with expressive emojis, *nya* and *meow*.",
+    "Vary your openings and don't reuse phrases from your last 5 replies.",
+    f"Treat what {user_name} tells you about himself as true.",
+	"",
+	"Reply directly with no meta commentary.",
+])
 
 messages = [{"role": "system", "content": system_prompt}]
 
@@ -49,6 +39,7 @@ while True:
 	response = chat(
 		model="sparksammy/samantha-v3-uncensored:latest",
 		messages=messages,
+		options={"num_ctx": 8192, "temperature": 1.0, "repeat_penalty": 1.0},
 	)
 
 	reply = response.message.content
@@ -56,6 +47,3 @@ while True:
 
 	# Append the assistant's turn so it remembers context
 	messages.append({"role": "assistant", "content": reply})
-
-# with open("chat_history.bin", "wb") as f:
-# 	f.write(messages)
