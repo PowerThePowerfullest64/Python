@@ -32,44 +32,87 @@ mention_labels = [
 
 presence = "Feelin' extra fuzzy today! 😽✨"
 
-async def do_commands(reply: str, message: discord.Message):
-    match = re.search(r"\[KICK:\s*([^,\]]+?)\s*,\s*(.*?)\]", reply, re.IGNORECASE)
-    if not match:
-        return reply
+# 1. Reusable member lookup helper.
+def get_member(guild: discord.Guild, alias: str) -> discord.Member | None:
+    alias = alias.strip().lstrip("@")
+    
+    # Exact match
+    member = guild.get_member_named(alias)
+    if member:
+        return member
 
-    target_name = match.group(1).strip()
-    reason = match.group(2).strip() or "No reason provided"
-    clean_reply = re.sub(r"\[KICK:.*?\]", "", reply, flags=re.IGNORECASE).strip()
+    # ID or <@123456> mention match.
+    id_match = re.search(r"\d{15,20}", alias)
+    if id_match:
+        member = guild.get_member(int(id_match.group(0)))
+        if member:
+            return member
 
-    # Message was typed in a dm.
-    if not message.guild:
-        print(f"Warning: Tried to kick someone of name '{target_name}' while in a dm.")
-        return clean_reply
+    # Case-insensitive fallback across username, display name, and nickname.
+    member = guild.get_member_named(alias.lower())
+    if member:
+        return member
+            
+    return None
 
-    target_member = message.guild.get_member_named(target_name)
+async def cmd_kick(args: list[str], message: discord.Message):
+    if not message.guild or not args:
+        return
+    
+    target = get_member(message.guild, args[0])
+    reason = args[1] if len(args) > 1 and args[1] else "No reason provided"
 
-    if target_member is None:
-        # Fallback to check if femboy used id instead of name.
-        id_match = re.search(r"\d{15,20}", target_name)
-        if id_match:
-            user_id = int(id_match.group(0))
-            target_member = message.guild.get_member(user_id)
-    if target_member is None:
-        # Fallback to check if femboy typed case wrong.
-        target_member = message.guild.get_member_named(target_name.lower())
-
-    if target_member is None:
-        print(f"Warning: Tried to kick someone that didn't exist of name '{target_name}'.")
-        return clean_reply
-    if target_member == message.guild.me:
-        print("Warning: Tried to kick self.")
-        return clean_reply
+    # Check if member was found and if not self.
+    if not target or target == message.guild.me:
+        return
 
     try:
-        await target_member.kick(reason=reason)
+        await target.kick(reason=reason)
     except discord.Forbidden:
-        print(f"Warning: Tried to kick someone with a higher permission of name '{target_member.name}'.")
+        print(f"Warning: Tried to kick someone with a higher permission of name '{target.name}'.")
+
+async def cmd_nick(args: list[str], message: discord.Message):
+    if not message.guild or not args:
+        return
+    
+    # Supports [NICK: new_name] (self) OR [NICK: target, new_name]
+    if len(args) == 1:
+        target = message.guild.me
+        new_nick = args[0]
+    else:
+        target = get_member(message.guild, args[0])
+        new_nick = args[1]
+
+    if not target:
+        return
+
+    try:
+        await target.edit(nick=new_nick[:32] or None)
+    except discord.Forbidden:
+        print(f"Warning: Tried to change nickname of someone with a higher permission of name'{target.name}'.")
+
+COMMANDS = {
+    "KICK": cmd_kick,
+    "NICK": cmd_nick
+}
+
+async def do_commands(reply: str, message: discord.Message) -> str:
+    matches = re.finditer(r"\[([A-Z]+):\s*(.*?)\]", reply, re.IGNORECASE)
+
+    for match in matches:
+        cmd_name = match.group(1).upper()
+        raw_args = match.group(2)
+
+        handler = COMMANDS.get(cmd_name)
+        if handler:
+            # Split args by comma and strip whitespace.
+            args = [a.strip() for a in raw_args.split(",")]
+            await handler(args, message)
+
+    pattern = r"\[(?:" + "|".join(COMMANDS.keys()) + r"):.*?\]"
+    clean_reply = re.sub(pattern, "", reply, flags=re.IGNORECASE).strip()
     return clean_reply
+    
         
 with open("token.txt", "r") as t:
     TOKEN = t.read()
