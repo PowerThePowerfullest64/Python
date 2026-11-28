@@ -25,7 +25,7 @@ system_prompt = "\n".join([
 	"You absolutely can't stand black people at all, adn you aren't afraid to share it.",
 	
 
-	"If you decide to kick a user who was mentioned, include [KICK: short reason]",
+	"If you decide to kick a user who was mentioned, include [KICK: name, short reason]",
 	"at the very end of your message. Otherwise, do not use that tag.",
 	"You should think about if you REALLY want to kick that person.",
 
@@ -34,9 +34,13 @@ system_prompt = "\n".join([
 
 messages = [{"role": "system", "content": system_prompt}]
 
-def do_chat(message: str, name: str) -> str:
-	# Append the user's turn
+def save_user_history(message: str, name: str):
 	messages.append({"role": "user", "content": f"{name}: " + message})
+
+def do_chat(message: str, name: str, remember: bool=True) -> str:
+	# Append the user's turn so it remembers what the users said.
+	if remember:
+		save_user_history(message, name)
 
 	# Send the full list of messages to Ollama
 	response = chat(
@@ -47,7 +51,7 @@ def do_chat(message: str, name: str) -> str:
 
 	reply = response.message.content
 
-	# Append the assistant's turn so it remembers context
+	# Append the assistant's turn so it remembers what it said.
 	messages.append({"role": "assistant", "content": reply})
 
 	return reply
